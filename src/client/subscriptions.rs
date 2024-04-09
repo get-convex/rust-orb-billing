@@ -112,13 +112,13 @@ pub struct UpdatePriceQuantityRequest<'a> {
 }
 
 /// Changes the plan on an existing subscription
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct SchedulePlanChangeRequest<'a> {
     /// The plan to switch to.
     #[serde(flatten)]
     pub plan_id: PlanId<'a>,
     /// One of ["requested_date", "end_of_subscription_term", "immediate"]
-    pub change_option: &'a str,
+    pub change_option: ChangeOption,
     /// The date that the plan change should take effect. This parameter
     /// can only be passed if the change_option is requested_date.
     pub change_date: Option<&'a str>,
@@ -131,6 +131,15 @@ pub struct SchedulePlanChangeRequest<'a> {
     /// Coupon to apply to this subscription
     #[serde(skip_serializing_if = "Option::is_none")]
     pub coupon_redemption_code: Option<&'a str>,
+}
+
+/// Change options for a plan change
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
+#[serde(rename_all = "snake_case")]
+pub enum ChangeOption {
+    RequestedDate,
+    EndOfSubscriptionTerm,
+    Immediate,
 }
 
 /// A request to update the price intervals on a subscription.
