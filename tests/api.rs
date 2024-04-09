@@ -385,6 +385,7 @@ async fn test_events() {
     let events = client
         .ingest_events(
             IngestionMode::Debug,
+            None,
             &[
                 IngestEventRequest {
                     customer_id: CustomerId::Orb(&customer.id),
@@ -415,6 +416,7 @@ async fn test_events() {
     let events = client
         .ingest_events(
             IngestionMode::Debug,
+            None,
             &[
                 IngestEventRequest {
                     customer_id: CustomerId::Orb(&customer.id),
@@ -446,6 +448,7 @@ async fn test_events() {
     let events = client
         .ingest_events(
             IngestionMode::Production,
+            None,
             &[IngestEventRequest {
                 customer_id: CustomerId::Orb(&customer.id),
                 idempotency_key: &ids[1],
