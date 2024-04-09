@@ -119,6 +119,9 @@ pub struct SchedulePlanChangeRequest<'a> {
     pub plan_id: PlanId<'a>,
     /// One of ["requested_date", "end_of_subscription_term", "immediate"]
     pub change_option: &'a str,
+    /// The date that the plan change should take effect. This parameter
+    /// can only be passed if the change_option is requested_date.
+    pub change_date: Option<&'a str>,
     /// Whether to align billing periods with the plan change date.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub align_billing_with_plan_change_date: Option<bool>,
