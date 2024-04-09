@@ -216,6 +216,7 @@ impl Client {
     pub async fn ingest_events(
         &self,
         mode: IngestionMode,
+        backfill_id: Option<String>,
         events: &[IngestEventRequest<'_>],
     ) -> Result<IngestEventResponse, Error> {
         #[derive(Serialize)]
@@ -225,6 +226,11 @@ impl Client {
 
         let req = self.build_request(Method::POST, ["ingest"]);
         let req = req.query(&[("debug", matches!(mode, IngestionMode::Debug))]);
+        let req = if let Some(backfill_id) = backfill_id {
+            req.query(&[("backfill_id", backfill_id)])
+        } else {
+            req
+        };
         let req = req.json(&Envelope { events });
         let res = self.send_request(req).await?;
         Ok(res)
