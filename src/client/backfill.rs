@@ -30,15 +30,21 @@ pub struct CreateBackfillParams {
     pub external_customer_id: Option<String>,
 }
 
+/// The status of the backfill. See https://docs.withorb.com/reference/fetch-backfill
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
 #[serde(rename_all = "snake_case")]
 pub enum BackfillStatus {
+    /// The backfill is pending.
     Pending,
+    /// The backfill is applied and reflected in usage data.
     Reflected,
+    /// The backfill is being reverted.
     PendingRevert,
+    /// The backfill is fully reverted.
     Reverted,
 }
 
+/// The current state of a backfill. See https://docs.withorb.com/reference/fetch-backfill
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct BackfillStatusResponse {
     /// The backfill id
@@ -64,8 +70,10 @@ pub struct BackfillStatusResponse {
     pub customer_id: Option<String>
 }
 
+/// A list of all backfills. See https://docs.withorb.com/reference/list-backfills.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ListBackfillsResponse {
+    /// The list of backfill status.
     pub data: Vec<BackfillStatusResponse>
 }
 
