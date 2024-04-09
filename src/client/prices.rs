@@ -59,6 +59,8 @@ pub struct PriceInterval {
     /// This is the date that Orb stops billing for this price.
     #[serde(with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
+    /// Fixed fee transitions for this price interval.
+    pub fixed_fee_quantity_transitions: Option<Vec<FixedFeeQuantityTransition>>,
 }
 
 /// A list of price intervals to edit on the subscription.
