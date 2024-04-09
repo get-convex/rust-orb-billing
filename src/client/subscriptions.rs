@@ -112,7 +112,7 @@ pub struct UpdatePriceQuantityRequest<'a> {
 }
 
 /// Changes the plan on an existing subscription
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct SchedulePlanChangeRequest<'a> {
     /// The plan to switch to.
     #[serde(flatten)]
@@ -134,11 +134,15 @@ pub struct SchedulePlanChangeRequest<'a> {
 }
 
 /// Change options for a plan change
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
 #[serde(rename_all = "snake_case")]
 pub enum ChangeOption {
+    /// Changes the plan on a requested date (change_date must be provided)
     RequestedDate,
+    /// Changes the plan at the end of the existing plan's term.
     EndOfSubscriptionTerm,
+    /// Changes the plan immediately.
+    #[default]
     Immediate,
 }
 
