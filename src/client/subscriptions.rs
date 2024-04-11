@@ -144,9 +144,14 @@ pub enum ChangeOption {
 
 /// A request to update the price intervals on a subscription.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
-pub struct PriceIntervalsRequest {
+pub struct PriceIntervalsRequest<'a> {
     /// Edit existing price intervals.
     pub edit: Vec<EditPriceInterval>,
+    /// An idempotency key can ensure that if the same request comes in
+    /// multiple times in a 48-hour period, only one makes changes.
+    // NOTE: this is passed in a request header, not the body
+    #[serde(skip_serializing)]
+    pub idempotency_key: Option<&'a str>,
 }
 
 /// An Orb subscription.
@@ -386,13 +391,17 @@ impl Client {
     }
 
     /// Add and edit price intervals on a subscription.
-    pub async fn price_intervals(&self, id: &str, params: &PriceIntervalsRequest) -> Result<Subscription, Error> {
-        let req = self.build_request(
+    pub async fn price_intervals(&self, id: &str, params: &PriceIntervalsRequest<'_>) -> Result<Subscription, Error> {
+        let mut req = self.build_request(
             Method::POST,
             SUBSCRIPTIONS_PATH
             .chain_one(id)
             .chain_one("price_intervals")
         );
+        if let Some(key) = params.idempotency_key {
+            req = req.header("Idempotency-Key", key);
+        }
+
         let req = req.json(params);
         let res = self.send_request(req).await?;
         Ok(res)
