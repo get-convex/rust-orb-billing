@@ -133,11 +133,11 @@ pub struct SchedulePlanChangeRequest<'a> {
     pub coupon_redemption_code: Option<&'a str>,
 }
 
-/// Change options for a plan change
+/// Options for when a plan transition should take place.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
 #[serde(rename_all = "snake_case")]
 pub enum ChangeOption {
-    /// Changes the plan on a requested date (change_date must be provided)
+    /// Changes the plan on a requested date
     RequestedDate,
     /// Changes the plan at the end of the existing plan's term.
     EndOfSubscriptionTerm,
@@ -156,6 +156,16 @@ pub struct PriceIntervalsRequest<'a> {
     // NOTE: this is passed in a request header, not the body
     #[serde(skip_serializing)]
     pub idempotency_key: Option<&'a str>,
+}
+
+/// A request to cancel a subscription.
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct CancelSubscriptionRequest {
+    /// Possible values: [end_of_subscription_term, immediate, requested_date]
+    pub cancel_option: ChangeOption,
+    /// The date that the cancellation should take effect. This parameter can only be passed if the cancel_option is requested_date.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub cancellation_date: Option<OffsetDateTime>
 }
 
 /// An Orb subscription.
@@ -411,5 +421,18 @@ impl Client {
         Ok(res)
     }
 
-    // TODO: cancel and unschedule subscriptions.
+    /// Cancel a subscription
+    pub async fn cancel_subscription(&self, id: &str, params: &CancelSubscriptionRequest) -> Result<Subscription, Error> {
+        let req = self.build_request(
+            Method::POST,
+            SUBSCRIPTIONS_PATH
+            .chain_one(id)
+            .chain_one("cancel")
+        );
+        let req = req.json(params);
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
+
+    // TODO: unschedule subscriptions.
 }
