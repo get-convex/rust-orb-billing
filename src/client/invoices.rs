@@ -223,6 +223,12 @@ impl Client {
         Ok(res)
     }
 
+    /// Void an invoice by ID.
+    pub async fn void_invoice(&self, id: &str) -> Result<Invoice, Error> {
+        let req = self.build_request(Method::POST, INVOICES.chain_one(id).chain_one("void"));
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
+
     // TODO: get upcoming invoice.
-    // TODO: void invoice.
 }
