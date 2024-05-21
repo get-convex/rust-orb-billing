@@ -66,6 +66,9 @@ pub struct Invoice {
     /// values.
     #[serde(default)]
     pub metadata: BTreeMap<String, String>,
+    /// If payment was attempted on this invoice but failed, this will be the time of the most recent attempt.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub payment_failed_at: Option<OffsetDateTime>,
     // TODO: many missing fields.
 }
 
