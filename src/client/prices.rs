@@ -99,7 +99,7 @@ pub struct OverrideUnitPrice {
     /// Id of the price
     pub id: String,
     /// Will be "unit" for this type of price override
-    pub model_type: String,
+    pub model_type: Option<String>,
     /// The starting quantity of the price
     pub fixed_price_quantity: Option<serde_json::Number>,
     /// Configuration for a unit price
