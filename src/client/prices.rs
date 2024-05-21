@@ -103,7 +103,7 @@ pub struct OverrideUnitPrice {
     /// The starting quantity of the price
     pub fixed_price_quantity: Option<serde_json::Number>,
     /// Configuration for a unit price
-    pub unit_config: UnitConfig,
+    pub unit_config: Option<UnitConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
