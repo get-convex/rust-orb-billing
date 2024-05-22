@@ -82,6 +82,15 @@ pub struct FixedFeeQuantityTransition {
     pub effective_date: String,
 }
 
+/// Quantity-only price overrides, which do not create child plans unlike normal price overrides.
+/// Price override for a unit price
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct QuantityOnlyPriceOverride {
+    /// Id of the price
+    pub id: String,
+    /// The quantity of the price
+    pub fixed_price_quantity: serde_json::Number,
+}
 
 /// Price overrides are used to update some or all prices in a plan for the specific subscription being created.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
@@ -99,11 +108,11 @@ pub struct OverrideUnitPrice {
     /// Id of the price
     pub id: String,
     /// Will be "unit" for this type of price override
-    pub model_type: Option<String>,
+    pub model_type: String,
     /// The starting quantity of the price
     pub fixed_price_quantity: Option<serde_json::Number>,
     /// Configuration for a unit price
-    pub unit_config: Option<UnitConfig>,
+    pub unit_config: UnitConfig,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]

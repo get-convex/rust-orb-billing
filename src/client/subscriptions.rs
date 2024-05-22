@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str, Serialize_enum_str};
 use time::OffsetDateTime;
 
-use crate::{EditPriceInterval, PriceOverride, RedeemedCoupon};
+use crate::{EditPriceInterval, QuantityOnlyPriceOverride, RedeemedCoupon};
 use crate::client::customers::{Customer, CustomerId, CustomerResponse};
 use crate::client::marketplaces::ExternalMarketplace;
 use crate::client::plans::{Plan, PlanId};
@@ -85,8 +85,10 @@ pub struct CreateSubscriptionRequest<'a> {
     #[serde(skip_serializing)]
     pub idempotency_key: Option<&'a str>,
     /// Optionally provide a list of overrides for prices on the plan
+    /// TODO: this should really be a union of QuantityOnlyPriceOverride and PriceOverride
+    /// but just using QuantityOnlyPriceOverride since that's the only one we need for now
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub price_overrides: Option<Vec<PriceOverride>>,
+    pub price_overrides: Option<Vec<QuantityOnlyPriceOverride>>,
     /// Coupon to apply to this subscription
     #[serde(skip_serializing_if = "Option::is_none")]
     pub coupon_redemption_code: Option<&'a str>,
@@ -126,8 +128,10 @@ pub struct SchedulePlanChangeRequest<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub align_billing_with_plan_change_date: Option<bool>,
     /// Optionally provide a list of overrides for prices on the plan
+    /// TODO: this should really be a union of QuantityOnlyPriceOverride and PriceOverride
+    /// but just using QuantityOnlyPriceOverride since that's the only one we need for now
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub price_overrides: Option<Vec<PriceOverride>>,
+    pub price_overrides: Option<Vec<QuantityOnlyPriceOverride>>,
     /// Coupon to apply to this subscription
     #[serde(skip_serializing_if = "Option::is_none")]
     pub coupon_redemption_code: Option<&'a str>,
