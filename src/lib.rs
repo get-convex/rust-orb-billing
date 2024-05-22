@@ -64,7 +64,7 @@ pub use client::invoices::{
 };
 pub use client::marketplaces::ExternalMarketplace;
 pub use client::plans::{Plan, PlanId, PlanListParams};
-pub use client::prices::{EditPriceInterval, FixedFeeQuantityTransition, OverrideUnitPrice, Price, PriceInterval, PriceOverride, TieredPrice, UnitPrice};
+pub use client::prices::{EditPriceInterval, FixedFeeQuantityTransition, OverrideUnitPrice, Price, PriceInterval, PriceOverride, QuantityOnlyPriceOverride, TieredPrice, UnitPrice};
 pub use client::subscriptions::{
     ChangeOption, CancelSubscriptionRequest, CreateSubscriptionRequest, PriceIntervalsRequest, SchedulePlanChangeRequest, Subscription, SubscriptionListParams,
     SubscriptionStatus, UpdatePriceQuantityRequest,
