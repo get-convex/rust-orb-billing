@@ -438,5 +438,15 @@ impl Client {
         Ok(res)
     }
 
-    // TODO: unschedule subscriptions.
+    /// Unschedules any pending cancellations for a subscription
+   pub async fn unschedule_cancellation(&self, id: &str) -> Result<Subscription, Error> {
+        let req = self.build_request(
+            Method::POST,
+            SUBSCRIPTIONS_PATH
+            .chain_one(id)
+            .chain_one("unschedule_cancellation")
+        );
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
 }
