@@ -69,7 +69,20 @@ pub struct Invoice {
     /// If payment was attempted on this invoice but failed, this will be the time of the most recent attempt.
     #[serde(with = "time::serde::rfc3339::option")]
     pub payment_failed_at: Option<OffsetDateTime>,
+    /// The auto-collection settings for this invoice.
+    pub auto_collection: AutoCollection,
     // TODO: many missing fields.
+}
+
+/// Auto-collection settings for an [`Invoice`].
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct AutoCollection {
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub next_attempt_at: Option<OffsetDateTime>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub previously_attempted_at: Option<OffsetDateTime>,
+    pub enabled: Option<bool>,
+    pub num_attempts: Option<u64>,
 }
 
 /// Identifies the customer associated with an [`Invoice`].
