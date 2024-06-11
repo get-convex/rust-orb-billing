@@ -92,6 +92,10 @@ pub struct CreateSubscriptionRequest<'a> {
     /// Coupon to apply to this subscription
     #[serde(skip_serializing_if = "Option::is_none")]
     pub coupon_redemption_code: Option<&'a str>,
+    /// When this subscription's accrued usage reaches this threshold, an invoice
+    /// will be issued for the subscription. If not specified, invoices will only
+    /// be issued at the end of the billing period.
+    pub invoicing_threshold: Option<&'a str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
@@ -170,6 +174,16 @@ pub struct CancelSubscriptionRequest {
     /// The date that the cancellation should take effect. This parameter can only be passed if the cancel_option is requested_date.
     #[serde(with = "time::serde::rfc3339::option")]
     pub cancellation_date: Option<OffsetDateTime>
+}
+
+/// A request to update a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct UpdateSubscriptionRequest<'a> {
+    /// When this subscription's accrued usage reaches this threshold, an invoice
+    /// will be issued for the subscription. If not specified, invoices will only
+    /// be issued at the end of the billing period.
+    pub invoicing_threshold: Option<&'a str>,
+    // TODO: add more fields
 }
 
 /// An Orb subscription.
@@ -446,6 +460,18 @@ impl Client {
             .chain_one(id)
             .chain_one("unschedule_cancellation")
         );
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
+
+    /// Updates a subscription
+    pub async fn update_subscription(&self, id: &str, params: &UpdateSubscriptionRequest<'_>) -> Result<Subscription, Error> {
+        let req = self.build_request(
+            Method::PUT,
+            SUBSCRIPTIONS_PATH
+            .chain_one(id)
+        );
+        let req = req.json(params);
         let res = self.send_request(req).await?;
         Ok(res)
     }
