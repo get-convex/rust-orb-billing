@@ -238,6 +238,10 @@ pub struct Subscription<C = Customer> {
     pub redeemed_coupon: Option<RedeemedCoupon>,
     /// The price intervals for this subscription.
     pub price_intervals: Vec<PriceInterval>,
+    /// When this subscription's accrued usage reaches this threshold, an invoice
+    /// will be issued for the subscription. If not specified, invoices will only
+    /// be issued at the end of the billing period.
+    pub invoicing_threshold: Option<String>,
 }
 
 /// The status of an Orb subscription.
@@ -357,6 +361,7 @@ impl Client {
                         created_at: subscription.created_at,
                         redeemed_coupon: subscription.redeemed_coupon,
                         price_intervals: subscription.price_intervals,
+                        invoicing_threshold: subscription.invoicing_threshold,
                     })),
                     CustomerResponse::Deleted {
                         id: _,
