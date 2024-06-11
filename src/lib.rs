@@ -67,7 +67,7 @@ pub use client::plans::{Plan, PlanId, PlanListParams};
 pub use client::prices::{EditPriceInterval, FixedFeeQuantityTransition, OverrideUnitPrice, Price, PriceInterval, PriceOverride, QuantityOnlyPriceOverride, TieredPrice, UnitPrice};
 pub use client::subscriptions::{
     ChangeOption, CancelSubscriptionRequest, CreateSubscriptionRequest, PriceIntervalsRequest, SchedulePlanChangeRequest, Subscription, SubscriptionListParams,
-    SubscriptionStatus, UpdatePriceQuantityRequest,
+    SubscriptionStatus, UpdatePriceQuantityRequest, UpdateSubscriptionRequest,
 };
 pub use client::taxes::{TaxId, TaxIdRequest, TaxIdType};
 pub use client::Client;
