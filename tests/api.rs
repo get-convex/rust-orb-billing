@@ -291,7 +291,7 @@ async fn test_customers() {
             email: email2,
             shipping_address: Some(AddressRequest {
                 city: Some("New York"),
-                country: Some(CountryCode::US),
+                country: Some(&CountryCode::US.to_string()),
                 line1: Some("440 Lafayette St"),
                 line2: Some("Floor 6"),
                 postal_code: Some("10003"),
@@ -299,7 +299,7 @@ async fn test_customers() {
             }),
             billing_address: Some(AddressRequest {
                 city: Some("Boston"),
-                country: Some(CountryCode::US),
+                country: Some(&CountryCode::US.to_string()),
                 ..Default::default()
             }),
             tax_id: Some(TaxIdRequest {
@@ -315,7 +315,7 @@ async fn test_customers() {
         customer2.shipping_address,
         Some(Address {
             city: Some("New York".into()),
-            country: Some(CountryCode::US),
+            country: Some(CountryCode::US.to_string()),
             line1: Some("440 Lafayette St".into()),
             line2: Some("Floor 6".into()),
             postal_code: Some("10003".into()),
@@ -326,7 +326,7 @@ async fn test_customers() {
         customer2.billing_address,
         Some(Address {
             city: Some("Boston".into()),
-            country: Some(CountryCode::US),
+            country: Some(CountryCode::US.to_string()),
             line1: None,
             line2: None,
             postal_code: None,
