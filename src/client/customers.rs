@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use codes_iso_3166::part_1::CountryCode;
 use codes_iso_4217::CurrencyCode;
 use futures_core::Stream;
 use futures_util::stream::TryStreamExt;
@@ -219,7 +218,7 @@ pub struct AddressRequest<'a> {
     pub city: Option<&'a str>,
     /// The country code.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub country: Option<CountryCode>,
+    pub country: Option<&'a str>,
     /// The first line of the street address.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line1: Option<&'a str>,
@@ -240,7 +239,7 @@ pub struct Address {
     /// The city.
     pub city: Option<String>,
     /// The country code.
-    pub country: Option<CountryCode>,
+    pub country: Option<String>,
     /// The first line of the street address.
     pub line1: Option<String>,
     /// The second line of the street address.
