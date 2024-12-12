@@ -23,6 +23,7 @@ use crate::config::ListParams;
 use crate::error::ApiError;
 use crate::{ClientBuilder, ClientConfig, Error};
 
+pub mod alerts;
 pub mod coupons;
 pub mod customers;
 pub mod events;

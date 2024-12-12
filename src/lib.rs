@@ -42,6 +42,7 @@ mod error;
 mod serde;
 mod util;
 
+pub use client::alerts::{Alert, AlertThreshold, AlertType, CreateSubscriptionAlertRequest};
 pub use client::backfill::{BackfillStatus, CreateBackfillParams, BackfillStatusResponse, ListBackfillsResponse};
 pub use client::coupons::{Coupon, CouponListParams, Discount, RedeemedCoupon};
 pub use client::customers::{
