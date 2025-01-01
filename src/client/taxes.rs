@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use codes_iso_3166::part_1::CountryCode;
 use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str, Serialize_enum_str};
 
@@ -26,7 +25,7 @@ pub struct TaxIdRequest<'a> {
     /// The value of the tax ID.
     pub value: &'a str,
     /// The country of the tax ID.
-    pub country: CountryCode,
+    pub country: String,
 }
 
 /// Tax ID details to display on an invoice.
@@ -38,7 +37,7 @@ pub struct TaxId {
     /// The value of the tax ID.
     pub value: String,
     /// The country of the tax ID.
-    pub country: CountryCode,
+    pub country: String,
 }
 
 /// The type of a [`TaxId`].

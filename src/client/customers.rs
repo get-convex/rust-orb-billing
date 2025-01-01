@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use codes_iso_4217::CurrencyCode;
 use futures_core::Stream;
 use futures_util::stream::TryStreamExt;
 use reqwest::{Method, RequestBuilder};
@@ -84,7 +83,7 @@ pub struct CreateCustomerRequest<'a> {
     pub billing_address: Option<AddressRequest<'a>>,
     /// The currency used for the customer's invoices and balance.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub currency: Option<CurrencyCode>,
+    pub currency: Option<String>,
     /// The tax ID details to display on the customer's invoice.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tax_id: Option<TaxIdRequest<'a>>,
@@ -172,7 +171,7 @@ pub struct Customer {
     /// The customer's billing address.
     pub billing_address: Option<Address>,
     /// The currency used for the customer's invoices and balance.
-    pub currency: Option<CurrencyCode>,
+    pub currency: Option<String>,
     /// The tax ID details to display on the customer's invoice.
     pub tax_id: Option<TaxId>,
     /// Undocumented upstream.
