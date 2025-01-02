@@ -305,7 +305,7 @@ async fn test_customers() {
             tax_id: Some(TaxIdRequest {
                 type_: orb_billing::TaxIdType::UsEin,
                 value: "12-3456789",
-                country: CountryCode::US,
+                country: CountryCode::US.to_string(),
             }),
             ..Default::default()
         })
@@ -338,7 +338,7 @@ async fn test_customers() {
         Some(TaxId {
             type_: orb_billing::TaxIdType::UsEin,
             value: "12-3456789".into(),
-            country: CountryCode::US,
+            country: CountryCode::US.to_string(),
         })
     );
 
