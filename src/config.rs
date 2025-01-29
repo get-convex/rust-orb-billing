@@ -85,7 +85,7 @@ impl ListParams {
     /// The page size only affects the size of each HTTP response. It does not
     /// change the observable output of the API.
     ///
-    /// The default page size is 20. The maximum page size is 500.
+    /// The default page size is 20. The maximum page size is 100.
     ///
     /// See the [Orb API pagination documentation][orb-docs] for details.
     ///
