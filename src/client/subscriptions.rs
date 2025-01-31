@@ -186,6 +186,39 @@ pub struct UpdateSubscriptionRequest<'a> {
     // TODO: add more fields
 }
 
+/// A request to fetch the costs of a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct FetchSubscriptionCostsRequest {
+    /// Costs returned are inclusive of timeframe_start.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub timeframe_start: Option<OffsetDateTime>,
+    /// Costs returned are exclusive of timeframe_end.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub timeframe_end: Option<OffsetDateTime>,
+}
+
+/// The response from fetching the costs of a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct FetchSubscriptionCostsResponse {
+    /// The data returned by the fetch subscription costs endpoint.
+    pub data: Vec<SubscriptionCostsEntry>,
+}
+
+/// One of the entries in the data that is returned by fetch subscription costs endpoint
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct SubscriptionCostsEntry {
+    /// Costs returned are inclusive of timeframe_start.
+    #[serde(with = "time::serde::rfc3339")]
+    pub timeframe_start: OffsetDateTime,
+    /// Costs returned are exclusive of timeframe_end.
+    #[serde(with = "time::serde::rfc3339")]
+    pub timeframe_end: OffsetDateTime,
+    /// Total costs for the timeframe, excluding any minimums and discounts.
+    pub subtotal: String,
+    /// Total costs for the timeframe, including any minimums and discounts.
+    pub total: String,
+}
+
 /// An Orb subscription.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct Subscription<C = Customer> {
@@ -475,6 +508,19 @@ impl Client {
             Method::PUT,
             SUBSCRIPTIONS_PATH
             .chain_one(id)
+        );
+        let req = req.json(params);
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
+
+    /// Fetches the costs of a subscription
+    pub async fn fetch_subscription_costs(&self, id: &str, params: &FetchSubscriptionCostsRequest) -> Result<FetchSubscriptionCostsResponse, Error> {
+        let req = self.build_request(
+            Method::GET,
+            SUBSCRIPTIONS_PATH
+            .chain_one(id)
+            .chain_one("costs")
         );
         let req = req.json(params);
         let res = self.send_request(req).await?;
