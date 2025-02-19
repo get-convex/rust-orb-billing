@@ -21,7 +21,14 @@ use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str, Serialize_enum_str};
 use time::OffsetDateTime;
 
-use crate::{EditPriceInterval, QuantityOnlyPriceOverride, RedeemedCoupon};
+use crate::{
+    AddAdjustmentInterval,
+    EditAdjustmentInterval,
+    EditPriceInterval,
+    QuantityOnlyPriceOverride,
+    RedeemedCoupon,
+    SubscriptionAdjustmentInterval
+};
 use crate::client::customers::{Customer, CustomerId, CustomerResponse};
 use crate::client::marketplaces::ExternalMarketplace;
 use crate::client::plans::{Plan, PlanId};
@@ -155,10 +162,14 @@ pub enum ChangeOption {
 }
 
 /// A request to update the price intervals on a subscription.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct PriceIntervalsRequest<'a> {
     /// Edit existing price intervals.
     pub edit: Vec<EditPriceInterval>,
+    /// Add adjustment intervals.
+    pub add_adjustments: Vec<AddAdjustmentInterval>,
+    /// Edit adjustment intervals.
+    pub edit_adjustments: Vec<EditAdjustmentInterval>,
     /// An idempotency key can ensure that if the same request comes in
     /// multiple times in a 48-hour period, only one makes changes.
     // NOTE: this is passed in a request header, not the body
@@ -271,6 +282,8 @@ pub struct Subscription<C = Customer> {
     pub redeemed_coupon: Option<RedeemedCoupon>,
     /// The price intervals for this subscription.
     pub price_intervals: Vec<PriceInterval>,
+    /// The adjustment intervals for this subscription.
+    pub adjustment_intervals: Vec<SubscriptionAdjustmentInterval>,
     /// When this subscription's accrued usage reaches this threshold, an invoice
     /// will be issued for the subscription. If not specified, invoices will only
     /// be issued at the end of the billing period.
@@ -394,6 +407,7 @@ impl Client {
                         created_at: subscription.created_at,
                         redeemed_coupon: subscription.redeemed_coupon,
                         price_intervals: subscription.price_intervals,
+                        adjustment_intervals: subscription.adjustment_intervals,
                         invoicing_threshold: subscription.invoicing_threshold,
                     })),
                     CustomerResponse::Deleted {
