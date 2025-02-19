@@ -73,6 +73,81 @@ pub struct EditPriceInterval {
     pub fixed_fee_quantity_transitions: Option<Vec<FixedFeeQuantityTransition>>,
 }
 
+/// A list of adjustment intervals on a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct SubscriptionAdjustmentInterval {
+    /// The id of the adjustment interval.
+    pub id: String,
+    /// The start date of the adjustment interval.
+    #[serde(with = "time::serde::rfc3339")]
+    pub start_date: OffsetDateTime,
+    /// The end date of the adjustment interval.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub end_date: Option<OffsetDateTime>,
+    /// The adjustment details of the adjustment interval.
+    pub adjustment: Adjustment,
+}
+
+/// The adjustment details of the subscription adjustment interval.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(tag = "adjustment_type")]
+pub enum Adjustment {
+    /// A maximum adjustment on a subscription.
+    #[serde(rename = "maximum")]
+    Maximum(MaximumAdjustment),
+    /// A percentage discount adjustment on a subscription.
+    #[serde(rename = "percentage_discount")]
+    PercentageDiscount,
+}
+
+/// A maximum adjustment on a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct MaximumAdjustment {
+    /// The maximum amount to apply to the price IDs.
+    pub maximum_amount: String,
+}
+
+/// A list of adjustments to add to the subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct AddAdjustmentInterval {
+    /// The start date of the adjustment interval. This is the date that the adjustment will start affecting prices on the subscription.
+    #[serde(with = "time::serde::rfc3339")]
+    pub start_date: OffsetDateTime,
+    /// The end date of the adjustment interval. This is the date that the adjustment will stop affecting prices on the subscription.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub end_date: Option<OffsetDateTime>,
+    /// The definition of a new adjustment to create and add to the subscription.
+    pub adjustment: NewAdjustment,
+}
+
+/// The definition of a new adjustment to create and add to the subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(tag = "adjustment_type")]
+pub enum NewAdjustment {
+    /// A maximum adjustment to create and add to the subscription.
+    #[serde(rename = "maximum")]
+    NewMaximum(NewMaximumAdjustment),
+}
+
+/// A new maximum adjustment to create and add to the subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct NewMaximumAdjustment {
+    /// The set of price IDs to which this adjustment applies.
+    pub applies_to_price_ids: Vec<String>,
+    /// The maximum amount to apply to the price IDs.
+    pub maximum_amount: String,
+}
+
+/// A list of adjustments to edit on the subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct EditAdjustmentInterval {
+    /// The id of the adjustment interval to edit.
+    pub adjustment_interval_id: String,
+    /// The updated end date of this adjustment interval. If not specified, the end date will not be updated.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub end_date: Option<OffsetDateTime>,
+}
+
 /// A fixed fee quantity transition is used to update the quantity for a price interval.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct FixedFeeQuantityTransition {
