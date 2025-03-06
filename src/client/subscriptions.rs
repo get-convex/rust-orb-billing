@@ -26,6 +26,7 @@ use crate::{
     EditAdjustmentInterval,
     EditPriceInterval,
     QuantityOnlyPriceOverride,
+    Price,
     RedeemedCoupon,
     SubscriptionAdjustmentInterval
 };
@@ -228,6 +229,17 @@ pub struct SubscriptionCostsEntry {
     pub subtotal: String,
     /// Total costs for the timeframe, including any minimums and discounts.
     pub total: String,
+    /// Per price costs
+    pub per_price_costs: Vec<PerPriceCostsEntry>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct PerPriceCostsEntry {
+    /// Price's contributions for the timeframe, excluding any minimums and discounts.
+    pub subtotal: String,
+    /// Price's contributions for the timeframe, including any minimums and discounts.
+    pub total: String,
+    pub price: Price,
 }
 
 /// An Orb subscription.
