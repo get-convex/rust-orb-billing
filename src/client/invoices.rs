@@ -71,7 +71,64 @@ pub struct Invoice {
     pub payment_failed_at: Option<OffsetDateTime>,
     /// The auto-collection settings for this invoice.
     pub auto_collection: AutoCollection,
+    /// The breakdown of prices in this invoice.
+    pub line_items: Vec<InvoiceLineItem>,
     // TODO: many missing fields.
+}
+
+/// This is basically the same struct as the one above, but doesn't have the invoice_date field
+/// because for some reason the fetch_upcoming_invoice API doesn't return it.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct UpcomingInvoice {
+        /// The Orb-assigned unique identifier for the invoice.
+        pub id: String,
+        /// The customer to whom this invoice was issued.
+        pub customer: InvoiceCustomer,
+        /// The subscription associated with this invoice.
+        pub subscription: Option<InvoiceSubscription>,
+        /// An automatically generated number to help track and reconcile invoices.
+        pub invoice_number: String,
+        /// The link to download the PDF representation of the invoice.
+        pub invoice_pdf: Option<String>,
+        /// An ISO 4217 currency string, or "credits"
+        pub currency: String,
+        /// The total after any minimums, discounts, and taxes have been applied.
+        pub total: String,
+        /// This is the final amount required to be charged to the
+        /// customer and reflects the application of the customer balance
+        /// to the total of the invoice.
+        pub amount_due: String,
+        /// The time at which the invoice was created.
+        #[serde(with = "time::serde::rfc3339")]
+        pub created_at: OffsetDateTime,
+        /// The time at which the invoice was issued.
+        #[serde(with = "time::serde::rfc3339::option")]
+        pub issued_at: Option<OffsetDateTime>,
+        /// The link to the hosted invoice
+        pub hosted_invoice_url: Option<String>,
+        /// The status (see [`InvoiceStatusFilter`] for details)
+        pub status: String,
+        /// Arbitrary metadata that is attached to the invoice. Cannot be nested, must have string
+        /// values.
+        #[serde(default)]
+        pub metadata: BTreeMap<String, String>,
+        /// If payment was attempted on this invoice but failed, this will be the time of the most recent attempt.
+        #[serde(with = "time::serde::rfc3339::option")]
+        pub payment_failed_at: Option<OffsetDateTime>,
+        /// The auto-collection settings for this invoice.
+        pub auto_collection: AutoCollection,
+        /// The breakdown of prices in this invoice.
+        pub line_items: Vec<InvoiceLineItem>,
+        // TODO: many missing fields.
+}
+
+/// A line item on an [`Invoice`].
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct InvoiceLineItem {
+    /// The final amount for a line item after all adjustments and pre paid credits have been applied.
+    pub amount: String,
+    /// The name of the price associated with this line item.
+    pub name: String,
 }
 
 /// Auto-collection settings for an [`Invoice`].
@@ -246,5 +303,11 @@ impl Client {
         Ok(res)
     }
 
-    // TODO: get upcoming invoice.
+    /// Fetch upcoming invoice
+    pub async fn fetch_upcoming_invoice(&self, subscription_id: &str) -> Result<UpcomingInvoice, Error> {
+        let req = self.build_request(Method::GET, INVOICES.chain_one("upcoming"));
+        let req = req.query(&[("subscription_id", subscription_id)]);
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
 }
