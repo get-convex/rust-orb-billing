@@ -125,6 +125,12 @@ pub struct UpcomingInvoice {
 /// A line item on an [`Invoice`].
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct InvoiceLineItem {
+    /// The line amount before before any adjustments.
+    pub subtotal: String,
+    /// The line amount after any adjustments and before overage conversion, credits and partial invoicing.
+    pub adjusted_subtotal: String,
+    /// Any amount applied from a partial invoice
+    pub partially_invoiced_amount: String,
     /// The final amount for a line item after all adjustments and pre paid credits have been applied.
     pub amount: String,
     /// The name of the price associated with this line item.
