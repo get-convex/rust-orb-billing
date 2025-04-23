@@ -59,6 +59,10 @@ pub struct PriceInterval {
     /// This is the date that Orb stops billing for this price.
     #[serde(with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
+    /// The start date of the current billing period. 
+    /// Set to null if this price interval is not currently active.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub current_billing_period_start_date: Option<OffsetDateTime>,
     /// Fixed fee transitions for this price interval.
     pub fixed_fee_quantity_transitions: Option<Vec<FixedFeeQuantityTransition>>,
 }
