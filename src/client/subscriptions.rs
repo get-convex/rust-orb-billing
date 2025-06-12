@@ -147,6 +147,10 @@ pub struct SchedulePlanChangeRequest<'a> {
     /// Coupon to apply to this subscription
     #[serde(skip_serializing_if = "Option::is_none")]
     pub coupon_redemption_code: Option<&'a str>,
+    /// When this subscription's accrued usage reaches this threshold, an invoice
+    /// will be issued for the subscription. If not specified, invoices will only
+    /// be issued at the end of the billing period.
+    pub invoicing_threshold: Option<&'a str>,
 }
 
 /// Options for when a plan transition should take place.
