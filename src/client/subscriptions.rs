@@ -125,6 +125,19 @@ pub struct UpdatePriceQuantityRequest<'a> {
     pub quantity: serde_json::Number,
 }
 
+/// Options for billing cycle alignment during a plan change.
+#[derive(Clone, Default, Debug, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
+#[serde(rename_all = "snake_case")]
+pub enum BillingCycleAlignment {
+    /// Keeps subscription's existing billing cycle alignment.
+    #[default]
+    Unchanged,
+    /// Aligns billing periods with the plan change's effective date.
+    PlanChangeDate,
+    /// Aligns billing periods with the start of the month.
+    StartOfMonth,
+}
+
 /// Changes the plan on an existing subscription
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct SchedulePlanChangeRequest<'a> {
@@ -136,9 +149,6 @@ pub struct SchedulePlanChangeRequest<'a> {
     /// The date that the plan change should take effect. This parameter
     /// can only be passed if the change_option is requested_date.
     pub change_date: Option<&'a str>,
-    /// Whether to align billing periods with the plan change date.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub align_billing_with_plan_change_date: Option<bool>,
     /// Optionally provide a list of overrides for prices on the plan
     /// TODO: this should really be a union of QuantityOnlyPriceOverride and PriceOverride
     /// but just using QuantityOnlyPriceOverride since that's the only one we need for now
@@ -151,6 +161,9 @@ pub struct SchedulePlanChangeRequest<'a> {
     /// will be issued for the subscription. If not specified, invoices will only
     /// be issued at the end of the billing period.
     pub invoicing_threshold: Option<&'a str>,
+    /// Reset billing periods to be aligned with the plan change's effective date
+    /// or start of the month. 
+    pub billing_cycle_alignment: Option<BillingCycleAlignment>,
 }
 
 /// Options for when a plan transition should take place.
