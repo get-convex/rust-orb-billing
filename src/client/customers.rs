@@ -92,6 +92,9 @@ pub struct CreateCustomerRequest<'a> {
     // NOTE: this is passed in a request header, not the body
     #[serde(skip_serializing)]
     pub idempotency_key: Option<&'a str>,
+    /// Whether to send emails
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_delivery: Option<bool>,
 }
 
 /// The subset of [`Customer`] used in update requests.
