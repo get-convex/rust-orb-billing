@@ -134,12 +134,27 @@ pub enum NewAdjustment {
 }
 
 /// A new maximum adjustment to create and add to the subscription.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct NewMaximumAdjustment {
     /// The set of price IDs to which this adjustment applies.
-    pub applies_to_price_ids: Vec<String>,
+    pub applies_to_price_ids: Option<Vec<String>>,
+    /// If set, the adjustment will apply to every price on the subscription.
+    pub applies_to_all: Option<bool>,
+    /// If set, only prices of the specified type will have the adjustment applied.
+    pub price_type: Option<PriceType>,
+    /// If set, only prices in the specified currency will have the adjustment applied.
+    pub currency: Option<String>,
     /// The maximum amount to apply to the price IDs.
     pub maximum_amount: String,
+}
+
+/// Price type-scoped filters (e.g., all usage-based prices)
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PriceType {
+    /// Usage-based prices
+    Usage,
+    // More options not listed here can be added in the future.
 }
 
 /// A list of adjustments to edit on the subscription.
