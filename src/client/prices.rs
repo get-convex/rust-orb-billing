@@ -43,7 +43,6 @@ pub struct TieredPrice {
     // TODO: many missing fields.
 }
 
-
 /// An Orb price interval
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct PriceInterval {
@@ -59,7 +58,7 @@ pub struct PriceInterval {
     /// This is the date that Orb stops billing for this price.
     #[serde(with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
-    /// The start date of the current billing period. 
+    /// The start date of the current billing period.
     /// Set to null if this price interval is not currently active.
     #[serde(with = "time::serde::rfc3339::option")]
     pub current_billing_period_start_date: Option<OffsetDateTime>,
@@ -109,6 +108,41 @@ pub enum Adjustment {
 pub struct MaximumAdjustment {
     /// The maximum amount to apply to the price IDs.
     pub maximum_amount: String,
+    /// The filters that determine which prices to apply this adjustment to.
+    pub filters: Vec<TransformPriceFilter>,
+}
+
+/// Filters for specifying which prices an adjustment applies to.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct TransformPriceFilter {
+    /// The property of the price to filter on.
+    pub field: TransformPriceFilterField,
+    /// Should prices that match the filter be included or excluded.
+    pub operator: TransformPriceFilterOperator,
+    /// The IDs or values that match this filter.
+    pub values: Vec<String>,
+}
+
+/// The field to filter prices on.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TransformPriceFilterField {
+    /// Filter by price ID.
+    PriceId,
+    /// Filter by price type (e.g., usage-based).
+    PriceType,
+    /// Filter by currency.
+    Currency,
+}
+
+/// The operator to apply to the price filter.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TransformPriceFilterOperator {
+    /// Include prices that match the filter.
+    Includes,
+    /// Exclude prices that match the filter.
+    Excludes,
 }
 
 /// A list of adjustments to add to the subscription.
@@ -221,7 +255,7 @@ pub struct UnitConfig {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct TieredConfig {
     /// Tiers for rating based on total usage quantities into the specified tier
-    pub tiers: Vec<Tier>
+    pub tiers: Vec<Tier>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
