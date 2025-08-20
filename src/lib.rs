@@ -65,7 +65,9 @@ pub use client::invoices::{
 };
 pub use client::marketplaces::ExternalMarketplace;
 pub use client::plans::{Plan, PlanId, PlanListParams};
-pub use client::prices::{AddAdjustmentInterval, Adjustment, EditAdjustmentInterval, EditPriceInterval, FixedFeeQuantityTransition, NewAdjustment, NewMaximumAdjustment, OverrideUnitPrice, Price, PriceType, PriceInterval, PriceOverride, QuantityOnlyPriceOverride, SubscriptionAdjustmentInterval, TieredPrice, UnitPrice};
+pub use client::prices::{AddAdjustmentInterval, Adjustment, EditAdjustmentInterval, EditPriceInterval, FixedFeeQuantityTransition, NewAdjustment, NewMaximumAdjustment, 
+    OverrideUnitPrice, Price, PriceType, PriceInterval, PriceOverride, QuantityOnlyPriceOverride, SubscriptionAdjustmentInterval, TieredPrice, 
+    TransformPriceFilter, TransformPriceFilterField, TransformPriceFilterOperator, UnitPrice};
 pub use client::subscriptions::{
     BillingCycleAlignment, ChangeOption, CancelSubscriptionRequest, CreateSubscriptionRequest, PriceIntervalsRequest, SchedulePlanChangeRequest, Subscription, SubscriptionListParams,
     SubscriptionStatus, UpdatePriceQuantityRequest, UpdateSubscriptionRequest, FetchSubscriptionCostsRequest, FetchSubscriptionCostsResponse, SubscriptionCostsEntry
