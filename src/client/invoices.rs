@@ -135,6 +135,12 @@ pub struct InvoiceLineItem {
     pub amount: String,
     /// The name of the price associated with this line item.
     pub name: String,
+    /// The start date of the range of time applied for this line item's price.
+    #[serde(with = "time::serde::rfc3339")]
+    pub start_date: OffsetDateTime,
+    /// The end date of the range of time applied for this line item's price.
+    #[serde(with = "time::serde::rfc3339")]
+    pub end_date: OffsetDateTime,
 }
 
 /// Auto-collection settings for an [`Invoice`].
