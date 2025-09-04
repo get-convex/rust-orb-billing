@@ -21,10 +21,12 @@ use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
 use crate::client::customers::CustomerId;
+use crate::client::prices::Tier;
 use crate::client::Client;
 use crate::config::ListParams;
 use crate::error::Error;
 use crate::util::StrIteratorExt;
+use crate::Price;
 
 const INVOICES: [&str; 1] = ["invoices"];
 
@@ -135,12 +137,35 @@ pub struct InvoiceLineItem {
     pub amount: String,
     /// The name of the price associated with this line item.
     pub name: String,
+    /// Either the fixed fee quantity or the usage during the service period.
+    pub quantity: serde_json::Number,
     /// The start date of the range of time applied for this line item's price.
     #[serde(with = "time::serde::rfc3339")]
     pub start_date: OffsetDateTime,
     /// The end date of the range of time applied for this line item's price.
     #[serde(with = "time::serde::rfc3339")]
     pub end_date: OffsetDateTime,
+    /// Price details for this line item.
+    pub price: Price,
+    /// For complex pricing structures, the line item can be broken down further.
+    pub sub_line_items: Vec<InvoiceSubLineItem>,
+}
+
+/// A sub-line item on an [`InvoiceLineItem`].
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(tag = "type")]
+pub enum InvoiceSubLineItem {
+    /// Tiered-price
+    #[serde(rename = "tier")]
+    Tier(TieredSubLineItem),
+}
+
+/// A tiered sub-line item on an [`InvoiceLineItem`].
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct TieredSubLineItem {
+    pub amount: String,
+    pub quantity: serde_json::Number,
+    pub tier_config: Tier,
 }
 
 /// Auto-collection settings for an [`Invoice`].

@@ -61,7 +61,7 @@ pub use client::events::{
     IngestEventRequest, IngestEventResponse, IngestionMode,
 };
 pub use client::invoices::{
-    Invoice, InvoiceCustomer, InvoiceListParams, InvoiceStatusFilter, InvoiceSubscription,
+    Invoice, InvoiceCustomer, InvoiceListParams, InvoiceStatusFilter, InvoiceSubLineItem, InvoiceSubscription,
 };
 pub use client::marketplaces::ExternalMarketplace;
 pub use client::plans::{Plan, PlanId, PlanListParams};
