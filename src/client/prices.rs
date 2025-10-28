@@ -101,6 +101,9 @@ pub enum Adjustment {
     /// A percentage discount adjustment on a subscription.
     #[serde(rename = "percentage_discount")]
     PercentageDiscount,
+    /// A minimum adjustment on a subscription.
+    #[serde(rename = "minimum")]
+    Minimum,
 }
 
 /// A maximum adjustment on a subscription.
