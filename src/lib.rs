@@ -70,7 +70,8 @@ pub use client::prices::{AddAdjustmentInterval, Adjustment, EditAdjustmentInterv
     TransformPriceFilter, TransformPriceFilterField, TransformPriceFilterOperator, UnitPrice};
 pub use client::subscriptions::{
     BillingCycleAlignment, ChangeOption, CancelSubscriptionRequest, CreateSubscriptionRequest, PriceIntervalsRequest, SchedulePlanChangeRequest, Subscription, SubscriptionListParams,
-    SubscriptionStatus, UpdatePriceQuantityRequest, UpdateSubscriptionRequest, FetchSubscriptionCostsRequest, FetchSubscriptionCostsResponse, SubscriptionCostsEntry
+    SubscriptionStatus, UpdatePriceQuantityRequest, UpdateSubscriptionRequest, FetchSubscriptionCostsRequest, FetchSubscriptionCostsResponse, SubscriptionCostsEntry,
+    FetchSubscriptionUsageRequest, FetchSubscriptionUsageResponse
 };
 pub use client::taxes::{TaxId, TaxIdRequest, TaxIdType};
 pub use client::Client;

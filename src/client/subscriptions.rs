@@ -259,6 +259,54 @@ pub struct PerPriceCostsEntry {
     pub price: Price,
 }
 
+/// A request to fetch the usage of a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct FetchSubscriptionUsageRequest {
+    /// Costs returned are inclusive of timeframe_start.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub timeframe_start: Option<OffsetDateTime>,
+    /// Costs returned are exclusive of timeframe_end.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub timeframe_end: Option<OffsetDateTime>,
+}
+
+/// The response from fetching the usage of a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct FetchSubscriptionUsageResponse {
+    /// The data returned by the fetch subscription usage endpoint.
+    pub data: Vec<SubscriptionUsageRecord>,
+}
+
+/// One of the records in the data that is returned by fetch subscription usage endpoint
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct SubscriptionUsageRecord {
+    pub billable_metric: BillableMetric,
+    /// The entries for this price
+    pub usage: Vec<SubscriptionUsageEntry>,
+}
+
+/// A billable metric associated with a subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct BillableMetric {
+    /// The id of the billable metric
+    pub id: String,
+    /// The name of the billable metric
+    pub name: String,
+}
+
+/// One of the entries in the data that is returned by fetch subscription usage endpoint
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct SubscriptionUsageEntry {
+    /// Usage returned is inclusive of timeframe_start.
+    #[serde(with = "time::serde::rfc3339")]
+    pub timeframe_start: OffsetDateTime,
+    /// Usage returned is exclusive of timeframe_end.
+    #[serde(with = "time::serde::rfc3339")]
+    pub timeframe_end: OffsetDateTime,
+    /// The quantity of usage for the timeframe.
+    pub quantity: serde_json::Number,
+}
+
 /// An Orb subscription.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct Subscription<C = Customer> {
@@ -564,6 +612,19 @@ impl Client {
             SUBSCRIPTIONS_PATH
             .chain_one(id)
             .chain_one("costs")
+        );
+        let req = req.json(params);
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
+
+    /// Fetches the usage of a subscription
+    pub async fn fetch_subscription_usage(&self, id: &str, params: &FetchSubscriptionUsageRequest) -> Result<FetchSubscriptionUsageResponse, Error> {
+        let req = self.build_request(
+            Method::GET,
+            SUBSCRIPTIONS_PATH
+            .chain_one(id)
+            .chain_one("usage")
         );
         let req = req.json(params);
         let res = self.send_request(req).await?;
