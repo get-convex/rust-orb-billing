@@ -95,6 +95,9 @@ pub struct CreateCustomerRequest<'a> {
     /// Whether to send emails
     #[serde(skip_serializing_if = "Option::is_none")]
     pub email_delivery: Option<bool>,
+    /// Tax configuration for the customer.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tax_configuration: Option<TaxConfiguration>,
 }
 
 /// The subset of [`Customer`] used in update requests.
@@ -122,6 +125,12 @@ pub struct UpdateCustomerRequest<'a> {
     /// The tax ID details to display on the customer's invoice.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tax_id: Option<TaxIdRequest<'a>>,
+    /// Whether to send emails
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_delivery: Option<bool>,
+    /// Tax configuration for the customer.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tax_configuration: Option<TaxConfiguration>, 
 }
 
 /// Configures an external payment or invoicing solution for a customer.
@@ -186,6 +195,8 @@ pub struct Customer {
     pub created_at: OffsetDateTime,
     /// The link to the customer's portal.
     pub portal_url: Option<String>,
+    /// Tax configuration for the customer.
+    pub tax_configuration: Option<TaxConfiguration>,
 }
 
 /// A payment provider.
@@ -250,6 +261,26 @@ pub struct Address {
     pub postal_code: Option<String>,
     /// The state.
     pub state: Option<String>,
+}
+
+/// Tax configuration for a customer.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(tag = "tax_provider")]
+pub enum TaxConfiguration {
+    /// Anrok tax configuration.
+    #[serde(rename = "anrok")]
+    Anrok(AnrokTaxConfiguration),
+}
+
+/// Tax configuration with Anrok as the provider.
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct AnrokTaxConfiguration {
+    /// Whether to automatically calculate tax for this customer. 
+    /// When null, inherits from account-level setting. 
+    /// When true or false, overrides the account setting.
+    pub automatic_tax_enabled: Option<bool>,
+    /// Some customers (e.g. nonprofits) may be exempt from tax.
+    pub tax_exempt: bool,
 }
 
 /// The types of ledger entries that can be created.
