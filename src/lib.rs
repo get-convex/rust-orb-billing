@@ -54,7 +54,7 @@ pub use client::customers::{
     CustomerCostPriceBlockPriceGroup, CustomerCostPriceBlockUnitPrice,
     CustomerCostPriceBlockUnitPriceConfig, CustomerCreditBlock, CustomerId,
     CustomerPaymentProviderRequest, LedgerEntry, LedgerEntryRequest, PaymentProvider,
-    UpdateCustomerRequest, VoidReason,
+    UpdateCustomerRequest, VoidReason, TaxConfiguration, AnrokTaxConfiguration
 };
 pub use client::events::{
     AmendEventRequest, Event, EventPropertyValue, EventSearchParams, IngestEventDebugResponse,
