@@ -62,6 +62,7 @@ pub use client::events::{
 };
 pub use client::invoices::{
     Invoice, InvoiceLineItem, InvoiceCustomer, InvoiceListParams, InvoiceStatusFilter, InvoiceSubLineItem, InvoiceSubscription, UpcomingInvoice,
+    InvoiceAdjustment
 };
 pub use client::marketplaces::ExternalMarketplace;
 pub use client::plans::{Plan, PlanId, PlanListParams};
