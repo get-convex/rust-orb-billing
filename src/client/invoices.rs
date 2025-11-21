@@ -149,6 +149,38 @@ pub struct InvoiceLineItem {
     pub price: Price,
     /// For complex pricing structures, the line item can be broken down further.
     pub sub_line_items: Vec<InvoiceSubLineItem>,
+    /// All adjustments applied to the line item in the order they were applied based on invoice calculations 
+    /// (ie. usage discounts -> amount discounts -> percentage discounts -> minimums -> maximums).
+    pub adjustments: Vec<InvoiceAdjustment>,
+}
+
+/// Adjustments applied to an [`InvoiceLineItem`].
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(tag = "adjustment_type")]
+pub enum InvoiceAdjustment {
+    /// Percentage adjustment
+    #[serde(rename = "percentage_discount")]
+    Percentage(PercentageInvoiceAdjustment),
+    /// Maximum adjustment
+    #[serde(rename = "maximum")]
+    Maximum,
+    /// Minimum adjustment
+    #[serde(rename = "minimum")]
+    Minimum,
+    /// Amount adjustment
+    #[serde(rename = "amount_discount")]
+    Amount,
+}
+
+/// A percentage adjustment applied to an [`InvoiceLineItem`].
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)] 
+pub struct PercentageInvoiceAdjustment {
+    /// The ID of the adjustment.
+    pub id: String,
+    /// True for adjustments that apply to an entire invoice, false for adjustments that apply to only one price.
+    pub is_invoice_level: bool,
+    /// The value applied by an adjustment.
+    pub amount: String,
 }
 
 /// A sub-line item on an [`InvoiceLineItem`].
