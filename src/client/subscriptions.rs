@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str, Serialize_enum_str};
 use time::OffsetDateTime;
 
+use crate::client::prices::AddPriceInterval;
 use crate::{
     AddAdjustmentInterval,
     EditAdjustmentInterval,
@@ -182,6 +183,8 @@ pub enum ChangeOption {
 /// A request to update the price intervals on a subscription.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct PriceIntervalsRequest<'a> {
+    /// Add new price intervals.
+    pub add: Vec<AddPriceInterval>,
     /// Edit existing price intervals.
     pub edit: Vec<EditPriceInterval>,
     /// Add adjustment intervals.

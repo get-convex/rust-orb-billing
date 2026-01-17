@@ -66,6 +66,16 @@ pub struct PriceInterval {
     pub fixed_fee_quantity_transitions: Option<Vec<FixedFeeQuantityTransition>>,
 }
 
+/// A list of price intervals to add to the subscription.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct AddPriceInterval {
+    /// This is the date that the price will start billing on the subscription.
+    #[serde(with = "time::serde::rfc3339")]
+    pub start_date: OffsetDateTime,
+    /// The external price id of the price to add to the subscription.
+    pub external_price_id: Option<String>,
+}
+
 /// A list of price intervals to edit on the subscription.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct EditPriceInterval {
