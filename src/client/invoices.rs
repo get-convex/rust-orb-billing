@@ -317,6 +317,19 @@ impl<'a> InvoiceListParams<'a> {
     }
 }
 
+/// Parameters for marking an invoice as paid.
+#[derive(Debug, Clone, Serialize)]
+pub struct MarkInvoiceAsPaidParams<'a> {
+    /// The date on which payment was received for this invoice (in RFC 3339 format).
+    pub payment_received_date: &'a str,
+    /// An optional external ID to associate with the payment.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<&'a str>,
+    /// An optional note to include on the invoice.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notes: Option<&'a str>,
+}
+
 impl Client {
     /// Lists invoices as configured by `params`.
     ///
@@ -368,6 +381,19 @@ impl Client {
     /// Void an invoice by ID.
     pub async fn void_invoice(&self, id: &str) -> Result<Invoice, Error> {
         let req = self.build_request(Method::POST, INVOICES.chain_one(id).chain_one("void"));
+        let res = self.send_request(req).await?;
+        Ok(res)
+    }
+
+    /// Mark an invoice as paid.
+    pub async fn mark_invoice_as_paid(
+        &self,
+        id: &str,
+        params: &MarkInvoiceAsPaidParams<'_>,
+    ) -> Result<Invoice, Error> {
+        let req = self
+            .build_request(Method::POST, INVOICES.chain_one(id).chain_one("mark_paid"));
+        let req = req.json(params);
         let res = self.send_request(req).await?;
         Ok(res)
     }
