@@ -1,6 +1,14 @@
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
+/// Orb credit allocation details on a price.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct CreditAllocation {
+    pub currency: String,
+    #[serde(default)]
+    pub allows_rollover: bool,
+}
+
 /// An Orb price
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(tag = "model_type")]
@@ -25,7 +33,8 @@ pub struct UnitPrice {
     pub unit_config: UnitConfig,
     /// Which phase of the plan this price is associated with
     pub plan_phase_order: Option<i64>,
-    // TODO: many missing fields.
+    /// Non-null when this price represents a credit allocation (pre-pay).
+    pub credit_allocation: Option<CreditAllocation>,
 }
 
 /// In tiered pricing, the cost of a given unit depends on the tier range that it
@@ -40,7 +49,8 @@ pub struct TieredPrice {
     pub tiered_config: TieredConfig,
     /// Which phase of the plan this price is associated with
     pub plan_phase_order: Option<i64>,
-    // TODO: many missing fields.
+    /// Non-null when this price represents a credit allocation (pre-pay).
+    pub credit_allocation: Option<CreditAllocation>,
 }
 
 /// An Orb price interval
