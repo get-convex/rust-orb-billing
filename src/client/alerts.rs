@@ -2,6 +2,7 @@ use futures_core::Stream;
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str, Serialize_enum_str};
+use time::OffsetDateTime;
 
 use crate::client::Client;
 use crate::client::ListParams;
@@ -12,11 +13,20 @@ const ALERTS_PATH: [&str; 1] = ["alerts"];
 
 /// Creates a subscription alert
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CreateSubscriptionAlertRequest {
+pub struct CreateSubscriptionAlertRequest<'a> {
     /// The type of alert to create
     pub r#type: AlertType,
     /// The thresholds that define the values at which the alert will be triggered
     pub thresholds: Option<Vec<AlertThreshold>>,
+    /// The metric ID to track for usage_exceeded alerts
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metric_id: Option<&'a str>,
+    /// Property keys for grouping cost alerts
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub grouping_keys: Option<Vec<&'a str>>,
+    /// Pricing unit for grouped cost alerts (required when grouping_keys is set)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pricing_unit_id: Option<&'a str>,
 }
 
 /// Updates an alert
@@ -64,12 +74,25 @@ impl<'a> AlertListParams<'a> {
 }
 
 /// An Orb alert type
+#[non_exhaustive]
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
 #[serde(rename_all = "snake_case")]
 pub enum AlertType {
+    /// Usage exceeded alert
+    UsageExceeded,
     /// Cost exceeded alert
     CostExceeded,
-    // TODO: Support other types of alerts
+    /// Credit balance depleted alert
+    CreditBalanceDepleted,
+    /// Credit balance dropped alert
+    CreditBalanceDropped,
+    /// Credit balance recovered alert
+    CreditBalanceRecovered,
+    /// License balance threshold reached alert
+    LicenseBalanceThresholdReached,
+    /// An unrecognized alert type.
+    #[serde(other)]
+    Other(String),
 }
 
 /// An Orb alert threshold
@@ -80,23 +103,42 @@ pub struct AlertThreshold {
 }
 
 /// An Orb alert
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct Alert {
     /// The Orb-assigned unique identifier for the alert.
     pub id: String,
     /// The type of alert
     pub r#type: AlertType,
+    /// When the alert was created.
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     /// Whether the alert is enabled or disabled.
     pub enabled: bool,
     /// The thresholds that define the values at which the alert will be triggered
     pub thresholds: Option<Vec<AlertThreshold>>,
+    /// The customer associated with the alert, if any.
+    pub customer: Option<serde_json::Value>,
+    /// The plan associated with the alert, if any.
+    pub plan: Option<serde_json::Value>,
+    /// The subscription associated with the alert, if any.
+    pub subscription: Option<serde_json::Value>,
+    /// The metric associated with the alert, if any.
+    pub metric: Option<serde_json::Value>,
+    /// The currency for the alert, if any.
+    pub currency: Option<String>,
+    /// The license type associated with the alert, if any.
+    pub license_type: Option<serde_json::Value>,
+    /// Property keys for grouping, if any.
+    pub grouping_keys: Option<Vec<String>>,
+    /// The current status of balance alerts, if applicable.
+    pub balance_alert_status: Option<Vec<serde_json::Value>>,
 }
 
 impl Client {
     /// This endpoint is used to create alerts at the subscription level.
-    pub async fn create_subscription_alert(&self, subscription_id: &str, params: &CreateSubscriptionAlertRequest) -> Result<Alert, Error> {
+    pub async fn create_subscription_alert(&self, subscription_id: &str, params: &CreateSubscriptionAlertRequest<'_>) -> Result<Alert, Error> {
         let req = self.build_request(
-            Method::POST, 
+            Method::POST,
             ALERTS_PATH
             .chain_one("subscription_id")
             .chain_one(subscription_id)
@@ -109,7 +151,7 @@ impl Client {
     /// This endpoint retrieves an alert by its ID.
     pub async fn fetch_alert(&self, alert_id: &str) -> Result<Alert, Error> {
         let req = self.build_request(
-            Method::GET, 
+            Method::GET,
             ALERTS_PATH
             .chain_one(alert_id)
             );
@@ -130,7 +172,7 @@ impl Client {
     /// This endpoint is used to disable an alert.
     pub async fn disable_alert(&self, alert_id: &str) -> Result<Alert, Error> {
         let req = self.build_request(
-            Method::POST, 
+            Method::POST,
             ALERTS_PATH
             .chain_one(alert_id)
             .chain_one("disable")
@@ -142,7 +184,7 @@ impl Client {
     /// This endpoint is used to enable an alert.
     pub async fn enable_alert(&self, alert_id: &str) -> Result<Alert, Error> {
         let req = self.build_request(
-            Method::POST, 
+            Method::POST,
             ALERTS_PATH
             .chain_one(alert_id)
             .chain_one("enable")
@@ -154,7 +196,7 @@ impl Client {
     /// This endpoint updates the thresholds of an alert.
     pub async fn update_alert(&self, alert_id: &str, params: &UpdateAlertRequest) -> Result<Alert, Error> {
         let req = self.build_request(
-            Method::PUT, 
+            Method::PUT,
             ALERTS_PATH
             .chain_one(alert_id)
             );
