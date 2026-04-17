@@ -60,7 +60,7 @@ pub struct CreateSubscriptionRequest<'a> {
     ///
     /// If `None`, defaults to the current date in the customer's timezone.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub start_date: Option<OffsetDateTime>,
     /// The name of the external marketplace that the subscription is attached
     /// to.
@@ -204,7 +204,7 @@ pub struct CancelSubscriptionRequest {
     /// Possible values: [end_of_subscription_term, immediate, requested_date]
     pub cancel_option: ChangeOption,
     /// The date that the cancellation should take effect. This parameter can only be passed if the cancel_option is requested_date.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub cancellation_date: Option<OffsetDateTime>
 }
 
@@ -222,10 +222,10 @@ pub struct UpdateSubscriptionRequest<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct FetchSubscriptionCostsRequest {
     /// Costs returned are inclusive of timeframe_start.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub timeframe_start: Option<OffsetDateTime>,
     /// Costs returned are exclusive of timeframe_end.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub timeframe_end: Option<OffsetDateTime>,
 }
 
@@ -266,10 +266,10 @@ pub struct PerPriceCostsEntry {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct FetchSubscriptionUsageRequest {
     /// Costs returned are inclusive of timeframe_start.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub timeframe_start: Option<OffsetDateTime>,
     /// Costs returned are exclusive of timeframe_end.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub timeframe_end: Option<OffsetDateTime>,
 }
 
@@ -323,17 +323,17 @@ pub struct Subscription<C = Customer> {
     #[serde(with = "time::serde::rfc3339")]
     pub start_date: OffsetDateTime,
     /// The date at which Orb stops billing for this subscription.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
     /// The status of the subscription.
     pub status: SubscriptionStatus,
     /// The start of the current billing period if the subscription is currently
     /// active.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub current_billing_period_start_date: Option<OffsetDateTime>,
     /// The end of the current billing period if the subscription is currently
     /// active.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub current_billing_period_end_date: Option<OffsetDateTime>,
     /// The current plan phase that is active, if the subscription's plan has
     /// phases.
@@ -393,7 +393,7 @@ pub struct SubscriptionFixedFee {
     #[serde(with = "time::serde::rfc3339")]
     pub start_date: OffsetDateTime,
     /// The date at which the fixed fee ends.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
     /// The price ID for the fixed fee.
     pub price_id: String,

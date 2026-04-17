@@ -22,7 +22,7 @@ pub struct CreateBackfillParams {
     #[serde(with = "time::serde::rfc3339")]
     pub timeframe_end: OffsetDateTime,
     /// The time at which no more events will be accepted for this backfill. The backfill will automatically begin reflecting throughout Orb at the close time. If not specified, it will default to 1 day after the creation of the backfill.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub close_time: Option<OffsetDateTime>,
     /// The ID of the customer to which this backfill is scoped. (cannot be used with external_customer_id)
     pub customer_id: Option<String>,
@@ -55,7 +55,7 @@ pub struct BackfillStatusResponse {
     #[serde(with = "time::serde::rfc3339")]
     pub close_time: OffsetDateTime,
     /// The time at which this backfill was reverted.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub reverted_at: Option<OffsetDateTime>,
     /// Undocumented
     #[serde(with = "time::serde::rfc3339")]

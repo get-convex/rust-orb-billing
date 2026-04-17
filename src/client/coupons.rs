@@ -53,7 +53,7 @@ pub struct RedeemedCoupon {
     /// The date when the coupon started applying
     pub start_date: OffsetDateTime,
     /// The date when the coupon stops applying
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
 }
 
