@@ -138,6 +138,7 @@ pub struct InvoiceLineItem {
     /// The name of the price associated with this line item.
     pub name: String,
     /// Either the fixed fee quantity or the usage during the service period.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub quantity: serde_json::Number,
     /// The start date of the range of time applied for this line item's price.
     #[serde(with = "time::serde::rfc3339")]
@@ -196,6 +197,7 @@ pub enum InvoiceSubLineItem {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct TieredSubLineItem {
     pub amount: String,
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub quantity: serde_json::Number,
     pub tier_config: Tier,
 }
@@ -208,6 +210,10 @@ pub struct AutoCollection {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub previously_attempted_at: Option<OffsetDateTime>,
     pub enabled: Option<bool>,
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub num_attempts: Option<u64>,
 }
 

@@ -363,6 +363,7 @@ pub struct CustomerCreditBlock {
     /// The Orb-assigned unique identifier for the credit block.
     pub id: String,
     /// The remaining credit balance for the block.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub balance: serde_json::Number,
     /// The date on which the block's balance will expire.
     #[serde(default, with = "time::serde::rfc3339::option")]
@@ -426,16 +427,20 @@ pub struct BaseLedgerEntry {
     /// The Orb-assigned unique identifier for the ledger entry.
     pub id: String,
     /// An incrementing identifier ordering the ledger entry relative to others.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub ledger_sequence_number: u64,
     /// The state of the ledger entry.
     pub entry_status: EntryStatus,
     /// The customer identifiers associated with the ledger entry.
     pub customer: CustomerIdentifier,
     /// The customer's credit balance before application of the ledger operation.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub starting_balance: serde_json::Number,
     /// The customer's credit balance after application of the ledger operation.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub ending_balance: serde_json::Number,
     /// The amount granted to the ledger.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub amount: serde_json::Number,
     /// The date the ledger entry was created.
     #[serde(with = "time::serde::rfc3339")]
@@ -463,6 +468,7 @@ pub struct VoidLedgerEntry {
     /// The reason the ledger entry was voided.
     pub void_reason: Option<String>,
     /// The amount voided from the ledger.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub void_amount: serde_json::Number,
 }
 
@@ -478,6 +484,7 @@ pub struct VoidInitiatedLedgerEntry {
     /// The reason the ledger entry was voided.
     pub void_reason: Option<String>,
     /// The amount voided from the ledger.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub void_amount: serde_json::Number,
 }
 
@@ -592,6 +599,10 @@ pub struct CustomerCostBucket {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct CustomerCostPriceBlock {
     /// The price's quantity for the timeframe.
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub quantity: Option<serde_json::Number>,
     /// The price's contributions for the timeframe, excluding any minimums and discounts.
     pub subtotal: String,
