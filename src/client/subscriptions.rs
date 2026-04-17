@@ -398,6 +398,7 @@ pub struct SubscriptionFixedFee {
     /// The price ID for the fixed fee.
     pub price_id: String,
     /// The quantity of the fixed fee.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub quantity: OrderedFloat<f64>,
 }
 
