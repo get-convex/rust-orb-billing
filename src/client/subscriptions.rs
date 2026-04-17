@@ -307,6 +307,7 @@ pub struct SubscriptionUsageEntry {
     #[serde(with = "time::serde::rfc3339")]
     pub timeframe_end: OffsetDateTime,
     /// The quantity of usage for the timeframe.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub quantity: serde_json::Number,
 }
 
@@ -337,6 +338,10 @@ pub struct Subscription<C = Customer> {
     pub current_billing_period_end_date: Option<OffsetDateTime>,
     /// The current plan phase that is active, if the subscription's plan has
     /// phases.
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub active_plan_phase_order: Option<i64>,
     /// List of all fixed fee quantities associated with this subscription.
     pub fixed_fee_quantity_schedule: Vec<SubscriptionFixedFee>,
@@ -345,6 +350,7 @@ pub struct Subscription<C = Customer> {
     ///
     /// A value of zero indicates that the invoice is due on issue, whereas a
     /// value of 30 represents that the customer has a month to pay the invoice.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub net_terms: i64,
     /// Determines whether issued invoices for this subscription will
     /// automatically be charged with the saved payment method on the due date.

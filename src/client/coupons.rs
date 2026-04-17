@@ -17,12 +17,21 @@ pub struct Coupon {
     /// User-facing coupon code
     pub redemption_code: String,
     /// The number of times this coupon has been redeemed.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub times_redeemed: serde_json::Number,
     /// This allows for a coupon's discount to apply for a limited time
     /// (determined in months); a null value here means "unlimited time".
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub duration_in_months: Option<serde_json::Number>,
     /// The maximum number of redemptions allowed for this coupon before it is exhausted;
     /// null here means "unlimited".
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub max_redemptions: Option<serde_json::Number>,
     /// The type of discount
     pub discount: Discount,
@@ -41,6 +50,7 @@ pub enum Discount {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct PercentageDiscount {
     pub applies_to_price_ids: Vec<String>,
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub percentage_discount: serde_json::Number,
 }
 
@@ -121,5 +131,19 @@ impl Client {
             None => req,
         };
         self.stream_paginated_request(&params.inner, req)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn percentage_discount_accepts_stringified_number() {
+        let disc: PercentageDiscount = serde_json::from_value(serde_json::json!({
+            "applies_to_price_ids": ["p_1"],
+            "percentage_discount": "0.25"
+        })).unwrap();
+        assert_eq!(disc.percentage_discount.as_f64().unwrap(), 0.25);
     }
 }

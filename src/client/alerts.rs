@@ -99,6 +99,7 @@ pub enum AlertType {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct AlertThreshold {
     /// The threshold value
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub value: serde_json::Number,
 }
 
