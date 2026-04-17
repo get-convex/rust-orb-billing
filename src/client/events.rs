@@ -133,10 +133,10 @@ struct EventFilter<'a> {
     event_ids: Option<&'a [&'a str]>,
     #[serde(skip_serializing_if = "Option::is_none")]
     invoice_id: Option<&'a str>,
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     #[serde(skip_serializing_if = "Option::is_none")]
     timeframe_start: Option<OffsetDateTime>,
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     #[serde(skip_serializing_if = "Option::is_none")]
     timeframe_end: Option<OffsetDateTime>,
 }

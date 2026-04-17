@@ -74,11 +74,11 @@ pub struct PriceInterval {
     pub start_date: OffsetDateTime,
     /// The end date of the price interval.
     /// This is the date that Orb stops billing for this price.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
     /// The start date of the current billing period.
     /// Set to null if this price interval is not currently active.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub current_billing_period_start_date: Option<OffsetDateTime>,
     /// Fixed fee transitions for this price interval.
     pub fixed_fee_quantity_transitions: Option<Vec<FixedFeeQuantityTransition>>,
@@ -113,7 +113,7 @@ pub struct SubscriptionAdjustmentInterval {
     #[serde(with = "time::serde::rfc3339")]
     pub start_date: OffsetDateTime,
     /// The end date of the adjustment interval.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
     /// The adjustment details of the adjustment interval.
     pub adjustment: Adjustment,
@@ -183,7 +183,7 @@ pub struct AddAdjustmentInterval {
     #[serde(with = "time::serde::rfc3339")]
     pub start_date: OffsetDateTime,
     /// The end date of the adjustment interval. This is the date that the adjustment will stop affecting prices on the subscription.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
     /// The definition of a new adjustment to create and add to the subscription.
     pub adjustment: NewAdjustment,
@@ -228,7 +228,7 @@ pub struct EditAdjustmentInterval {
     /// The id of the adjustment interval to edit.
     pub adjustment_interval_id: String,
     /// The updated end date of this adjustment interval. If not specified, the end date will not be updated.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub end_date: Option<OffsetDateTime>,
 }
 
@@ -338,5 +338,25 @@ mod tests {
             "unit_amount": "1.00"
         })).unwrap();
         assert!(tier.last_unit.is_none());
+    }
+
+    #[test]
+    fn price_interval_allows_missing_end_date() {
+        let json = serde_json::json!({
+            "id": "pi_1",
+            "price": {
+                "model_type": "unit",
+                "id": "p_1",
+                "name": "test",
+                "unit_config": { "unit_amount": "1.00" },
+                "plan_phase_order": null,
+                "credit_allocation": null,
+            },
+            "start_date": "2026-01-01T00:00:00Z",
+            // end_date, current_billing_period_start_date, fixed_fee_quantity_transitions omitted
+        });
+        let pi: PriceInterval = serde_json::from_value(json).unwrap();
+        assert!(pi.end_date.is_none());
+        assert!(pi.current_billing_period_start_date.is_none());
     }
 }

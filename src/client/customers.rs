@@ -319,11 +319,11 @@ pub struct AddIncrementCreditLedgerEntryRequestParams<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<&'a str>,
     /// The date on which the block's balance will expire.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expiry_date: Option<OffsetDateTime>,
     /// The date on which the block's balance will become available for use.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub effective_date: Option<OffsetDateTime>,
     /// The price per credit.
@@ -365,7 +365,7 @@ pub struct CustomerCreditBlock {
     /// The remaining credit balance for the block.
     pub balance: serde_json::Number,
     /// The date on which the block's balance will expire.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub expiry_date: Option<OffsetDateTime>,
     /// The price per credit.
     pub per_unit_cost_basis: Option<String>,
@@ -414,7 +414,7 @@ pub struct LedgerEntryCreditBlock {
     //// The Orb-assigned unique identifier for the credit block.
     pub id: String,
     /// The date on which the block's balance will expire.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub expiry_date: Option<OffsetDateTime>,
     /// The price per credit.
     pub per_unit_cost_basis: Option<String>,

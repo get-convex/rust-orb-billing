@@ -58,7 +58,7 @@ pub struct Invoice {
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
     /// The time at which the invoice was issued.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub issued_at: Option<OffsetDateTime>,
     /// The link to the hosted invoice
     pub hosted_invoice_url: Option<String>,
@@ -69,7 +69,7 @@ pub struct Invoice {
     #[serde(default)]
     pub metadata: BTreeMap<String, String>,
     /// If payment was attempted on this invoice but failed, this will be the time of the most recent attempt.
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub payment_failed_at: Option<OffsetDateTime>,
     /// The auto-collection settings for this invoice.
     pub auto_collection: AutoCollection,
@@ -104,7 +104,7 @@ pub struct UpcomingInvoice {
         #[serde(with = "time::serde::rfc3339")]
         pub created_at: OffsetDateTime,
         /// The time at which the invoice was issued.
-        #[serde(with = "time::serde::rfc3339::option")]
+        #[serde(default, with = "time::serde::rfc3339::option")]
         pub issued_at: Option<OffsetDateTime>,
         /// The link to the hosted invoice
         pub hosted_invoice_url: Option<String>,
@@ -115,7 +115,7 @@ pub struct UpcomingInvoice {
         #[serde(default)]
         pub metadata: BTreeMap<String, String>,
         /// If payment was attempted on this invoice but failed, this will be the time of the most recent attempt.
-        #[serde(with = "time::serde::rfc3339::option")]
+        #[serde(default, with = "time::serde::rfc3339::option")]
         pub payment_failed_at: Option<OffsetDateTime>,
         /// The auto-collection settings for this invoice.
         pub auto_collection: AutoCollection,
@@ -203,9 +203,9 @@ pub struct TieredSubLineItem {
 /// Auto-collection settings for an [`Invoice`].
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct AutoCollection {
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub next_attempt_at: Option<OffsetDateTime>,
-    #[serde(with = "time::serde::rfc3339::option")]
+    #[serde(default, with = "time::serde::rfc3339::option")]
     pub previously_attempted_at: Option<OffsetDateTime>,
     pub enabled: Option<bool>,
     pub num_attempts: Option<u64>,
