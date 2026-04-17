@@ -54,7 +54,10 @@ pub struct PlanPhase {
     pub name: String,
     /// How many terms of length duration_unit this phase is active for. If null,
     /// this phase is evergreen and active indefinitely.
-    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string")]
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub duration: Option<i64>,
     /// Possible values: [daily, monthly, quarterly, annual]
     pub duration_unit: Option<String>,
