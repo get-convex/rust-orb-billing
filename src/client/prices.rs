@@ -32,6 +32,7 @@ pub struct UnitPrice {
     /// Config with rates per unit
     pub unit_config: UnitConfig,
     /// Which phase of the plan this price is associated with
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string")]
     pub plan_phase_order: Option<i64>,
     /// Non-null when this price represents a credit allocation (pre-pay).
     pub credit_allocation: Option<CreditAllocation>,
@@ -48,6 +49,7 @@ pub struct TieredPrice {
     /// Config with rates per tier
     pub tiered_config: TieredConfig,
     /// Which phase of the plan this price is associated with
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string")]
     pub plan_phase_order: Option<i64>,
     /// Non-null when this price represents a credit allocation (pre-pay).
     pub credit_allocation: Option<CreditAllocation>,
@@ -228,6 +230,7 @@ pub struct EditAdjustmentInterval {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct FixedFeeQuantityTransition {
     /// The quantity of the fixed fee quantity transition.
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub quantity: serde_json::Number,
     /// The date that the fixed fee quantity transition should take effect.
     pub effective_date: String,
@@ -271,7 +274,10 @@ pub struct UnitConfig {
     /// Rate per unit of usage
     pub unit_amount: String,
     /// Multiplier to scale rated quantity by
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub scaling_factor: Option<serde_json::Number>,
 }
 
@@ -284,10 +290,36 @@ pub struct TieredConfig {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct Tier {
     /// Inclusive tier starting value
+    #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub first_unit: serde_json::Number,
     /// Exclusive tier ending value. If null, this is treated as the last tier
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
     pub last_unit: Option<serde_json::Number>,
     /// Rate per unit of usage
     pub unit_amount: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tier_accepts_stringified_numbers() {
+        let from_strings: Tier = serde_json::from_value(serde_json::json!({
+            "first_unit": "0",
+            "last_unit": "10",
+            "unit_amount": "1.00"
+        })).unwrap();
+        assert_eq!(from_strings.first_unit, serde_json::Number::from(0));
+
+        let from_numbers: Tier = serde_json::from_value(serde_json::json!({
+            "first_unit": 0,
+            "last_unit": 10,
+            "unit_amount": "1.00"
+        })).unwrap();
+        assert_eq!(from_numbers, from_strings);
+    }
 }
