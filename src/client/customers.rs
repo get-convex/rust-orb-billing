@@ -130,7 +130,7 @@ pub struct UpdateCustomerRequest<'a> {
     pub email_delivery: Option<bool>,
     /// Tax configuration for the customer.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tax_configuration: Option<TaxConfiguration>, 
+    pub tax_configuration: Option<TaxConfiguration>,
 }
 
 /// Configures an external payment or invoicing solution for a customer.
@@ -250,16 +250,22 @@ pub struct AddressRequest<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct Address {
     /// The city.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub city: Option<String>,
     /// The country code.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub country: Option<String>,
     /// The first line of the street address.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub line1: Option<String>,
     /// The second line of the street address.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub line2: Option<String>,
     /// The postal code.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub postal_code: Option<String>,
     /// The state.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<String>,
 }
 
@@ -275,8 +281,8 @@ pub enum TaxConfiguration {
 /// Tax configuration with Anrok as the provider.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct AnrokTaxConfiguration {
-    /// Whether to automatically calculate tax for this customer. 
-    /// When null, inherits from account-level setting. 
+    /// Whether to automatically calculate tax for this customer.
+    /// When null, inherits from account-level setting.
     /// When true or false, overrides the account setting.
     pub automatic_tax_enabled: Option<bool>,
     /// Some customers (e.g. nonprofits) may be exempt from tax.
