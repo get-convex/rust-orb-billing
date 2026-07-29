@@ -19,7 +19,51 @@ pub enum Price {
     /// Used to represent tiered prices
     #[serde(rename = "tiered")]
     Tiered(TieredPrice),
+    /// Used to represent matrix (dimensional) prices, e.g. a rate that varies by
+    /// region or deployment class.
+    #[serde(rename = "matrix")]
+    Matrix(MatrixPrice),
     // TODO: Add support for additional prices
+}
+
+/// In matrix pricing, the per-unit rate is looked up in a one- or two-dimensional
+/// matrix keyed by dimension values (e.g. region, deployment class).
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct MatrixPrice {
+    /// Id of the price
+    pub id: String,
+    /// Name of the price
+    pub name: String,
+    /// Config with rates per matrix cell
+    pub matrix_config: MatrixConfig,
+    /// Which phase of the plan this price is associated with
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
+    pub plan_phase_order: Option<i64>,
+    /// Non-null when this price represents a credit allocation (pre-pay).
+    pub credit_allocation: Option<CreditAllocation>,
+}
+
+/// Configuration for a matrix (dimensional) price.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct MatrixConfig {
+    /// The fallback per-unit amount when no matrix cell matches.
+    pub default_unit_amount: String,
+    /// The dimensions modeled by the matrix, e.g. `["region"]`.
+    pub dimensions: Vec<Option<String>>,
+    /// The per-unit amount for each configured matrix cell.
+    pub matrix_values: Vec<MatrixValue>,
+}
+
+/// A per-unit amount for a single cell of a matrix price.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct MatrixValue {
+    /// The dimension values identifying this cell.
+    pub dimension_values: Vec<Option<String>>,
+    /// The per-unit amount usage in this cell bills at.
+    pub unit_amount: String,
 }
 
 /// With unit pricing, each unit costs a fixed amount.
