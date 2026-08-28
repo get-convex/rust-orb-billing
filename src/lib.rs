@@ -47,7 +47,8 @@ pub use client::backfill::{BackfillStatus, CreateBackfillParams, BackfillStatusR
 pub use client::coupons::{Coupon, CouponListParams, Discount, RedeemedCoupon};
 pub use client::customers::{
     AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address,
-    AddressRequest, CostViewMode, CreateCustomerRequest, Customer, CustomerCostBucket,
+    AddressRequest, CostViewMode, CreateCustomerRequest, CreditBlockListParams,
+    CreditBlockStatus, Customer, CustomerCostBucket,
     CustomerCostItem, CustomerCostParams, CustomerCostPriceBlock,
     CustomerCostPriceBlockMatrixPrice, CustomerCostPriceBlockMatrixPriceConfig,
     CustomerCostPriceBlockMatrixPriceValue, CustomerCostPriceBlockPrice,
