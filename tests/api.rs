@@ -40,7 +40,7 @@ use test_log::test;
 use tokio::time::{self, Duration};
 use tracing::info;
 
-use orb_billing::{AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address, AddressRequest, AmendEventRequest, Client, ClientConfig, CostViewMode, CreateCustomerRequest, CreateSubscriptionRequest, Customer, CustomerCostParams, CustomerCostPriceBlockPrice, CustomerId, CustomerPaymentProviderRequest, Error, Event, EventPropertyValue, EventSearchParams, IngestEventRequest, IngestionMode, InvoiceListParams, LedgerEntry, LedgerEntryRequest, ListParams, PaymentProvider, SubscriptionListParams, TaxId, TaxIdRequest, UpdateCustomerRequest, VoidReason, PlanListParams, CreateBackfillParams};
+use orb_billing::{AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address, AddressRequest, AmendEventRequest, Client, ClientConfig, CostViewMode, CreateCustomerRequest, CreateSubscriptionRequest, CreditBlockListParams, Customer, CustomerCostParams, CustomerCostPriceBlockPrice, CustomerId, CustomerPaymentProviderRequest, Error, Event, EventPropertyValue, EventSearchParams, IngestEventRequest, IngestionMode, InvoiceListParams, LedgerEntry, LedgerEntryRequest, ListParams, PaymentProvider, SubscriptionListParams, TaxId, TaxIdRequest, UpdateCustomerRequest, VoidReason, PlanListParams, CreateBackfillParams};
 
 /// The API key to authenticate with.
 static API_KEY: Lazy<String> = Lazy::new(|| env::var("ORB_API_KEY").expect("missing ORB_API_KEY"));
@@ -174,7 +174,7 @@ async fn test_customers() {
     };
     assert_eq!(inc_res.ledger.customer.id, customer.id);
     let balance: Vec<_> = client
-        .get_customer_credit_balance(&customer.id, &ListParams::default().page_size(1))
+        .get_customer_credit_balance(&customer.id, &CreditBlockListParams::default().page_size(1))
         .try_collect()
         .await
         .unwrap();
@@ -199,7 +199,7 @@ async fn test_customers() {
     let balance: Vec<_> = client
         .get_customer_credit_balance_by_external_id(
             &customer.external_id.unwrap(),
-            &ListParams::default().page_size(1),
+            &CreditBlockListParams::default().page_size(1),
         )
         .try_collect()
         .await

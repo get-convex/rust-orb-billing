@@ -363,6 +363,21 @@ pub struct AddVoidCreditLedgerEntryRequestParams<'a> {
     pub description: Option<&'a str>,
 }
 
+/// The state of a credit block.
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
+#[serde(rename_all = "snake_case")]
+pub enum CreditBlockStatus {
+    /// The block's balance is available to draw down.
+    Active,
+    /// The block was purchased on an invoice that hasn't been paid yet, so its
+    /// balance isn't available yet.
+    PendingPayment,
+    /// An unrecognized credit block status.
+    #[serde(other)]
+    Other(String),
+}
+
 /// A block of credit held by a customer.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct CustomerCreditBlock {
@@ -371,11 +386,86 @@ pub struct CustomerCreditBlock {
     /// The remaining credit balance for the block.
     #[serde(deserialize_with = "serde_aux::field_attributes::deserialize_number_from_string")]
     pub balance: serde_json::Number,
+    /// The balance the block was granted with. Subtracting [`Self::balance`]
+    /// from this gives the amount drawn down so far.
+    #[serde(
+        default,
+        deserialize_with = "serde_aux::field_attributes::deserialize_option_number_from_string"
+    )]
+    pub maximum_initial_balance: Option<serde_json::Number>,
+    /// The date on which the block's balance became available for use. Differs
+    /// from the creation time for backdated credits.
+    #[serde(default, with = "time::serde::rfc3339::option")]
+    pub effective_date: Option<OffsetDateTime>,
     /// The date on which the block's balance will expire.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub expiry_date: Option<OffsetDateTime>,
+    /// The state of the block.
+    pub status: CreditBlockStatus,
     /// The price per credit.
     pub per_unit_cost_basis: Option<String>,
+}
+
+/// Parameters for listing a customer's credit blocks.
+#[derive(Debug, Clone)]
+pub struct CreditBlockListParams<'a> {
+    inner: ListParams,
+    currency: Option<&'a str>,
+    include_all_blocks: bool,
+}
+
+impl<'a> Default for CreditBlockListParams<'a> {
+    fn default() -> CreditBlockListParams<'a> {
+        CreditBlockListParams::DEFAULT
+    }
+}
+
+impl<'a> CreditBlockListParams<'a> {
+    /// The default credit block list parameters.
+    ///
+    /// Exposed as a constant for use in constant evaluation contexts.
+    pub const DEFAULT: CreditBlockListParams<'static> = CreditBlockListParams {
+        inner: ListParams::DEFAULT,
+        currency: None,
+        include_all_blocks: false,
+    };
+
+    /// Sets the page size for the list operation.
+    ///
+    /// See [`ListParams::page_size`].
+    pub const fn page_size(mut self, page_size: u64) -> Self {
+        self.inner = self.inner.page_size(page_size);
+        self
+    }
+
+    /// Lists blocks denominated in the given currency rather than in the
+    /// custom pricing unit named `credits`, which Orb uses by default.
+    ///
+    /// Accepts an ISO 4217 string (e.g. `USD`) or the name of a custom pricing
+    /// unit.
+    pub const fn currency(mut self, currency: &'a str) -> Self {
+        self.currency = Some(currency);
+        self
+    }
+
+    /// Includes expired and fully drawn-down blocks, which Orb omits by
+    /// default.
+    pub const fn include_all_blocks(mut self, include_all_blocks: bool) -> Self {
+        self.include_all_blocks = include_all_blocks;
+        self
+    }
+
+    fn apply(&self, req: RequestBuilder) -> RequestBuilder {
+        let req = match self.currency {
+            Some(currency) => req.query(&[("currency", currency)]),
+            None => req,
+        };
+        if self.include_all_blocks {
+            req.query(&[("include_all_blocks", "true")])
+        } else {
+            req
+        }
+    }
 }
 
 /// The type of ledger entry
@@ -813,30 +903,34 @@ impl Client {
         Ok(())
     }
 
-    /// Fetch all unexpired, non-zero credit blocks for a customer.
+    /// Fetch the credit blocks for a customer. Unless
+    /// [`CreditBlockListParams::include_all_blocks`] is set, only unexpired,
+    /// non-zero blocks are returned.
     ///
     /// The underlying API call is paginated. The returned stream will fetch
     /// additional pages as it is consumed.
     pub fn get_customer_credit_balance(
         &self,
         id: &str,
-        params: &ListParams,
+        params: &CreditBlockListParams,
     ) -> impl Stream<Item = Result<CustomerCreditBlock, Error>> + '_ {
         let req = self.build_request(
             Method::GET,
             CUSTOMERS_PATH.chain_one(id).chain_one("credits"),
         );
-        self.stream_paginated_request(params, req)
+        self.stream_paginated_request(&params.inner, params.apply(req))
     }
 
-    /// Fetch all unexpired, non-zero credit blocks for a customer by external ID.
+    /// Fetch the credit blocks for a customer by external ID. Unless
+    /// [`CreditBlockListParams::include_all_blocks`] is set, only unexpired,
+    /// non-zero blocks are returned.
     ///
     /// The underlying API call is paginated. The returned stream will fetch
     /// additional pages as it is consumed.
     pub fn get_customer_credit_balance_by_external_id(
         &self,
         external_id: &str,
-        params: &ListParams,
+        params: &CreditBlockListParams,
     ) -> impl Stream<Item = Result<CustomerCreditBlock, Error>> + '_ {
         let req = self.build_request(
             Method::GET,
@@ -845,7 +939,7 @@ impl Client {
                 .chain_one(external_id)
                 .chain_one("credits"),
         );
-        self.stream_paginated_request(params, req)
+        self.stream_paginated_request(&params.inner, params.apply(req))
     }
 
     /// Create a new ledger entry for the specified customer's balance.
@@ -893,5 +987,51 @@ impl Client {
         let req = req.apply(&params.filter);
         let res: ArrayResponse<CustomerCostBucket> = self.send_request(req).await?;
         Ok(res.data)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{CreditBlockStatus, CustomerCreditBlock};
+
+    #[test]
+    fn credit_block_matches_api_response() {
+        // Shape of a credit block created by a plan's credit allocation, as
+        // returned by `GET /customers/{id}/credits?currency=USD`.
+        let block: CustomerCreditBlock = serde_json::from_value(serde_json::json!({
+            "id": "c6GDuUFkXV9WQ7Ue",
+            "balance": 1500.0,
+            "maximum_initial_balance": 2500.0,
+            "effective_date": "2026-09-06T00:00:00+00:00",
+            "expiry_date": "2026-10-06T00:00:00+00:00",
+            "status": "active",
+            "per_unit_cost_basis": "1.00",
+            "credit_block_source": "allocation",
+            "metadata": {},
+            "filters": [],
+        }))
+        .unwrap();
+        assert_eq!(block.balance, serde_json::Number::from_f64(1500.0).unwrap());
+        assert_eq!(
+            block.maximum_initial_balance,
+            Some(serde_json::Number::from_f64(2500.0).unwrap())
+        );
+        assert!(block.effective_date.is_some());
+        assert_eq!(block.status, CreditBlockStatus::Active);
+    }
+
+    #[test]
+    fn credit_block_allows_missing_optional_fields() {
+        let block: CustomerCreditBlock = serde_json::from_value(serde_json::json!({
+            "id": "block_1",
+            "balance": "42",
+            "status": "pending_payment",
+            "per_unit_cost_basis": null,
+        }))
+        .unwrap();
+        assert!(block.maximum_initial_balance.is_none());
+        assert!(block.effective_date.is_none());
+        assert!(block.expiry_date.is_none());
+        assert_eq!(block.status, CreditBlockStatus::PendingPayment);
     }
 }
