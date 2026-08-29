@@ -378,6 +378,34 @@ pub enum CreditBlockStatus {
     Other(String),
 }
 
+/// Where a credit block came from.
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize_enum_str, Serialize_enum_str)]
+#[serde(rename_all = "snake_case")]
+pub enum CreditBlockSource {
+    /// Granted by a credit allocation on the customer's plan.
+    Allocation,
+    /// Purchased through a top-up.
+    TopUp,
+    /// Rolled forward from a commitment.
+    Commitment,
+    /// Granted by hand, e.g. through the Orb dashboard or the ledger API.
+    Manual,
+    /// An unrecognized credit block source.
+    #[serde(other)]
+    Other(String),
+}
+
+/// The plan credit allocation a credit block was granted by.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+pub struct CreditBlockAllocation {
+    /// The Orb-assigned identifier for the item the allocation is for. Look it
+    /// up with [`Client::get_item`] for a human-readable name.
+    pub item_id: String,
+    /// The currency the allocation is denominated in.
+    pub currency: Option<String>,
+}
+
 /// A block of credit held by a customer.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct CustomerCreditBlock {
@@ -402,6 +430,12 @@ pub struct CustomerCreditBlock {
     pub expiry_date: Option<OffsetDateTime>,
     /// The state of the block.
     pub status: CreditBlockStatus,
+    /// Where the block came from.
+    pub credit_block_source: CreditBlockSource,
+    /// The plan credit allocation that granted the block. `None` for blocks
+    /// that didn't come from an allocation, e.g. manual grants.
+    #[serde(default)]
+    pub credit_allocation: Option<CreditBlockAllocation>,
     /// The price per credit.
     pub per_unit_cost_basis: Option<String>,
 }
@@ -468,6 +502,66 @@ impl<'a> CreditBlockListParams<'a> {
     }
 }
 
+/// Parameters for listing a customer's credit ledger.
+#[derive(Debug, Clone)]
+pub struct CreditLedgerListParams<'a> {
+    inner: ListParams,
+    currency: Option<&'a str>,
+    entry_type: Option<&'a str>,
+}
+
+impl<'a> Default for CreditLedgerListParams<'a> {
+    fn default() -> CreditLedgerListParams<'a> {
+        CreditLedgerListParams::DEFAULT
+    }
+}
+
+impl<'a> CreditLedgerListParams<'a> {
+    /// The default credit ledger list parameters.
+    ///
+    /// Exposed as a constant for use in constant evaluation contexts.
+    pub const DEFAULT: CreditLedgerListParams<'static> = CreditLedgerListParams {
+        inner: ListParams::DEFAULT,
+        currency: None,
+        entry_type: None,
+    };
+
+    /// Sets the page size for the list operation.
+    ///
+    /// See [`ListParams::page_size`].
+    pub const fn page_size(mut self, page_size: u64) -> Self {
+        self.inner = self.inner.page_size(page_size);
+        self
+    }
+
+    /// Lists entries denominated in the given currency rather than in the
+    /// custom pricing unit named `credits`, which Orb uses by default.
+    ///
+    /// Accepts an ISO 4217 string (e.g. `USD`) or the name of a custom pricing
+    /// unit.
+    pub const fn currency(mut self, currency: &'a str) -> Self {
+        self.currency = Some(currency);
+        self
+    }
+
+    /// Lists only entries of the given type, e.g. `increment`.
+    pub const fn entry_type(mut self, entry_type: &'a str) -> Self {
+        self.entry_type = Some(entry_type);
+        self
+    }
+
+    fn apply(&self, req: RequestBuilder) -> RequestBuilder {
+        let req = match self.currency {
+            Some(currency) => req.query(&[("currency", currency)]),
+            None => req,
+        };
+        match self.entry_type {
+            Some(entry_type) => req.query(&[("entry_type", entry_type)]),
+            None => req,
+        }
+    }
+}
+
 /// The type of ledger entry
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(tag = "entry_type")]
@@ -481,7 +575,9 @@ pub enum LedgerEntry {
     /// Voiding of an existing ledger entry has been initiated
     #[serde(rename = "void_initiated")]
     VoidInitiated(VoidInitiatedLedgerEntry),
-    // TODO: additional ledger entry types
+    /// An entry type this crate doesn't model yet, e.g. `decrement`.
+    #[serde(other)]
+    Other,
 }
 
 /// The state of a ledger entry
@@ -942,6 +1038,25 @@ impl Client {
         self.stream_paginated_request(&params.inner, params.apply(req))
     }
 
+    /// Lists entries in a customer's credit ledger, newest first.
+    ///
+    /// The underlying API call is paginated. The returned stream will fetch
+    /// additional pages as it is consumed.
+    pub fn list_credit_ledger_entries(
+        &self,
+        id: &str,
+        params: &CreditLedgerListParams,
+    ) -> impl Stream<Item = Result<LedgerEntry, Error>> + '_ {
+        let req = self.build_request(
+            Method::GET,
+            CUSTOMERS_PATH
+                .chain_one(id)
+                .chain_one("credits")
+                .chain_one("ledger"),
+        );
+        self.stream_paginated_request(&params.inner, params.apply(req))
+    }
+
     /// Create a new ledger entry for the specified customer's balance.
     pub async fn create_ledger_entry(
         &self,
@@ -992,7 +1107,7 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    use super::{CreditBlockStatus, CustomerCreditBlock};
+    use super::{CreditBlockSource, CreditBlockStatus, CustomerCreditBlock, LedgerEntry};
 
     #[test]
     fn credit_block_matches_api_response() {
@@ -1007,6 +1122,16 @@ mod tests {
             "status": "active",
             "per_unit_cost_basis": "1.00",
             "credit_block_source": "allocation",
+            "credit_allocation": {
+                "allows_rollover": false,
+                "currency": "USD",
+                "custom_expiration": null,
+                "expire_on_price_change": false,
+                "filters": [],
+                "item_id": "EtH5rrYFeJdoLDTn",
+                "license_type_id": null
+            },
+            "credit_commitment": null,
             "metadata": {},
             "filters": [],
         }))
@@ -1018,6 +1143,39 @@ mod tests {
         );
         assert!(block.effective_date.is_some());
         assert_eq!(block.status, CreditBlockStatus::Active);
+        assert_eq!(block.credit_block_source, CreditBlockSource::Allocation);
+        assert_eq!(
+            block.credit_allocation.map(|a| a.item_id),
+            Some("EtH5rrYFeJdoLDTn".to_string())
+        );
+    }
+
+    #[test]
+    fn credit_block_allows_missing_allocation() {
+        // A hand-granted block has no allocation behind it.
+        let block: CustomerCreditBlock = serde_json::from_value(serde_json::json!({
+            "id": "block_1",
+            "balance": 50.0,
+            "status": "active",
+            "credit_block_source": "manual",
+            "per_unit_cost_basis": null,
+        }))
+        .unwrap();
+        assert_eq!(block.credit_block_source, CreditBlockSource::Manual);
+        assert!(block.credit_allocation.is_none());
+    }
+
+    #[test]
+    fn ledger_entry_tolerates_unmodeled_entry_types() {
+        // Listing a ledger turns up `decrement` entries, which this crate
+        // doesn't model; they must not fail the whole page.
+        let entry: LedgerEntry = serde_json::from_value(serde_json::json!({
+            "entry_type": "decrement",
+            "id": "oYb5rTWWVqKszgUM",
+            "amount": 0.08,
+        }))
+        .unwrap();
+        assert_eq!(entry, LedgerEntry::Other);
     }
 
     #[test]
@@ -1026,6 +1184,7 @@ mod tests {
             "id": "block_1",
             "balance": "42",
             "status": "pending_payment",
+            "credit_block_source": "manual",
             "per_unit_cost_basis": null,
         }))
         .unwrap();

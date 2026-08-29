@@ -47,8 +47,9 @@ pub use client::backfill::{BackfillStatus, CreateBackfillParams, BackfillStatusR
 pub use client::coupons::{Coupon, CouponListParams, Discount, RedeemedCoupon};
 pub use client::customers::{
     AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address,
-    AddressRequest, CostViewMode, CreateCustomerRequest, CreditBlockListParams,
-    CreditBlockStatus, Customer, CustomerCostBucket,
+    AddressRequest, CostViewMode, CreateCustomerRequest, CreditBlockAllocation,
+    CreditBlockListParams, CreditBlockSource, CreditBlockStatus, CreditLedgerListParams,
+    Customer, CustomerCostBucket,
     CustomerCostItem, CustomerCostParams, CustomerCostPriceBlock,
     CustomerCostPriceBlockMatrixPrice, CustomerCostPriceBlockMatrixPriceConfig,
     CustomerCostPriceBlockMatrixPriceValue, CustomerCostPriceBlockPrice,
@@ -65,6 +66,7 @@ pub use client::invoices::{
     Invoice, InvoiceLineItem, InvoiceCustomer, InvoiceListParams, InvoiceStatusFilter, InvoiceSubLineItem, InvoiceSubscription, MarkInvoiceAsPaidParams, UpcomingInvoice,
     InvoiceAdjustment
 };
+pub use client::items::Item;
 pub use client::marketplaces::ExternalMarketplace;
 pub use client::plans::{Plan, PlanId, PlanListParams};
 pub use client::prices::{AddAdjustmentInterval, AddPriceInterval, Adjustment, CreditAllocation, EditAdjustmentInterval, EditPriceInterval, FixedFeeQuantityTransition, NewAdjustment, NewMaximumAdjustment, 

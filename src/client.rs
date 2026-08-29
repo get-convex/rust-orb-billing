@@ -28,6 +28,7 @@ pub mod coupons;
 pub mod customers;
 pub mod events;
 pub mod invoices;
+pub mod items;
 pub mod marketplaces;
 pub mod plans;
 pub mod prices;
