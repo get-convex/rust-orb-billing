@@ -69,12 +69,12 @@ pub use client::invoices::{
 pub use client::items::Item;
 pub use client::marketplaces::ExternalMarketplace;
 pub use client::plans::{Plan, PlanId, PlanListParams};
-pub use client::prices::{AddAdjustmentInterval, AddPriceInterval, Adjustment, CreditAllocation, EditAdjustmentInterval, EditPriceInterval, FixedFeeQuantityTransition, NewAdjustment, NewMaximumAdjustment, 
-    OverrideUnitPrice, Price, PriceType, PriceInterval, PriceOverride, QuantityOnlyPriceOverride, SubscriptionAdjustmentInterval, TieredPrice, 
+pub use client::prices::{AddAdjustmentInterval, AddPriceInterval, Adjustment, CreditAllocation, EditAdjustmentInterval, EditPriceInterval, FixedFeeQuantityTransition, MatrixConfig, MatrixPrice, MatrixValue, NewAdjustment, NewMaximumAdjustment,
+    OverrideUnitPrice, Price, PriceType, PriceInterval, PriceOverride, QuantityOnlyPriceOverride, SubscriptionAdjustmentInterval, TieredPrice,
     TransformPriceFilter, TransformPriceFilterField, TransformPriceFilterOperator, UnitPrice};
 pub use client::subscriptions::{
     BillingCycleAlignment, ChangeOption, CancelSubscriptionRequest, CreateSubscriptionRequest, PriceIntervalsRequest, SchedulePlanChangeRequest, Subscription, SubscriptionListParams,
-    SubscriptionStatus, UpdatePriceQuantityRequest, UpdateSubscriptionRequest, FetchSubscriptionCostsRequest, FetchSubscriptionCostsResponse, SubscriptionCostsEntry,
+    SubscriptionStatus, UpdatePriceQuantityRequest, UpdateSubscriptionRequest, FetchSubscriptionCostsRequest, FetchSubscriptionCostsResponse, PerPriceCostsEntry, SubscriptionCostsEntry,
     FetchSubscriptionUsageRequest, FetchSubscriptionUsageResponse
 };
 pub use client::taxes::{TaxId, TaxIdRequest, TaxIdType};
